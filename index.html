@@ -1,11 +1,5 @@
-<!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu App de Viagens</title>
-    <link rel="stylesheet" href="style.css">
-</head>
+
 <body>
 
     <div class="app-container">
@@ -22,7 +16,7 @@
         <main>
             <div id="trips-tab" class="tab-content active">
                 <div id="trip-grid" class="trip-grid"></div>
-                <p id="no-trips-message" style="display: none;">Nenhuma viagem cadastrada. Clique no '+' para começar.</p>
+                <p id="no-trips-message" style="display: none; text-align: center; color: var(--text-muted); margin-top: 2rem;">Nenhuma viagem cadastrada. Clique no '+' para começar.</p>
             </div>
             <div id="ai-planner-tab" class="tab-content"></div>
             <div id="flights-tab" class="tab-content"></div>
@@ -173,10 +167,9 @@
     </template>
     <template id="documents-tab-template"><div><h3>Documentos - Em construção</h3></div></template>
     <template id="tripDashboard-tab-template"><div><h3>Dashboard da Viagem - Em construção</h3></div></template>
-    
-    <!-- Link para o seu ficheiro de script -->
-    <script src="script.js"></script>
+
+    <script src="config.js"></script>
+<script type="module" src="script.js"></script>
 </body>
 </html>
-
-
+    
