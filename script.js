@@ -7,7 +7,7 @@ import { getAnalytics } from "firebase/analytics";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: import.meta.env.FIREBASE_API_KEY,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "meu-app-de-viagens.firebaseapp.com",
   projectId: "meu-app-de-viagens",
   storageBucket: "meu-app-de-viagens.firebasestorage.app",
@@ -17,8 +17,8 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-initializeApp(firebaseConfig);
-getAnalytics(initializeApp(firebaseConfig));
+const app = initializeApp(firebaseConfig);
+getAnalytics(app);
 
 document.addEventListener('DOMContentLoaded', () => {
     let trips = JSON.parse(localStorage.getItem('trips')) || [];
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function callGeminiAPI(prompt) {
-        const apiKey = import.meta.env.GEMINI_API_KEY;
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
         const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
 
