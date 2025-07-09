@@ -1,0 +1,314 @@
+        /* --- GERAL E TEMA --- */
+        :root {
+            --bg-dark: #111214;
+            --surface-dark: #1c1c1f;
+            --surface-glass: rgba(40, 40, 40, 0.5);
+            --primary-color: #8a5cf6; /* Violeta */
+            --secondary-color: #3b82f6; /* Azul para IA */
+            --border-color: rgba(255, 255, 255, 0.15);
+            --text-light: #e5e7eb;
+            --text-muted: #9ca3af;
+            --icon-color: #a0a0a0;
+            --icon-active-color: #ffffff;
+            --icon-bg: #2d2d30;
+            --disabled-color: #4a4a4d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 1rem;
+        }
+
+        /* --- CABEÇALHO SUPERIOR --- */
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            flex-shrink: 0;
+        }
+        
+        .main-header .title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        
+        .main-header .trip-context {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .main-header .icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .main-header .add-icon {
+             background-color: var(--surface-dark);
+             border-radius: 12px;
+        }
+
+        /* --- CONTEÚDO PRINCIPAL (PÁGINAS) --- */
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1.5rem 1rem;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* --- ESTILOS DO DASHBOARD --- */
+        .trip-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .trip-card {
+            background: var(--surface-glass);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        .manage-button {
+            width: 100%;
+            background-color: #3a3a3d;
+            color: var(--text-light);
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* --- ESTILOS DAS ABAS DE DETALHES --- */
+        .form-card {
+            background-color: var(--surface-dark);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-card input, .form-card select, .form-card textarea {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background-color: #444;
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+        
+        .form-card textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-card button {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .ai-button {
+            background-color: var(--secondary-color);
+            margin-top: 1rem;
+        }
+        
+        .item-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .item-list li {
+            background-color: var(--surface-dark);
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+        }
+        
+        /* --- CALENDÁRIO DO ITINERÁRIO --- */
+        .itinerary-calendar {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+        .day-card {
+            background-color: var(--surface-dark);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .day-card:hover {
+            background-color: #3a3a3d;
+        }
+        .day-card .day-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .day-card .day-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background-color: var(--surface-dark);
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* --- BARRA DE NAVEGAÇÃO INFERIOR --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #222327;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            border-radius: 1.25rem;
+            width: fit-content;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            z-index: 10;
+        }
+
+        .nav-list {
+            display: flex;
+            list-style: none;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background-color: var(--icon-bg);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .nav-item.disabled {
+            background-color: #222327;
+            cursor: not-allowed;
+        }
+        
+        .nav-item:not(.disabled):hover {
+            background-color: #444;
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-color);
+        }
+
+        .nav-item .icon {
+            width: 24px;
+            height: 24px;
+            color: var(--icon-color);
+            transition: color 0.2s;
+        }
+        
+        .nav-item.disabled .icon {
+            color: var(--disabled-color);
+        }
+        
+        .nav-item.active .icon,
+        .nav-item:not(.disabled):hover .icon {
+            color: var(--icon-active-color);
+        }
+        
+        .loading-indicator {
+            text-align: center;
+            padding: 1rem;
+            display: none;
+        }

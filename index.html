@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu App de Viagens</title>
-    <!-- Link para o seu ficheiro de estilos -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div class="app-container">
         <!-- CABEÇALHO -->
         <header class="main-header">
@@ -22,7 +22,7 @@
         <main>
             <div id="trips-tab" class="tab-content active">
                 <div id="trip-grid" class="trip-grid"></div>
-                <p id="no-trips-message" style="display: none; text-align: center; color: var(--text-muted); margin-top: 2rem;">Nenhuma viagem cadastrada. Clique no '+' para começar.</p>
+                <p id="no-trips-message" style="display: none;">Nenhuma viagem cadastrada. Clique no '+' para começar.</p>
             </div>
             <div id="ai-planner-tab" class="tab-content"></div>
             <div id="flights-tab" class="tab-content"></div>
@@ -40,7 +40,7 @@
                 <li class="nav-item active" data-tab="trips">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                 </li>
-                <li class="nav-item disabled" data-tab="ai-planner">
+                 <li class="nav-item disabled" data-tab="ai-planner">
                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.122a3 3 0 0 1 5 0"/><path d="M9.512 4.455A3 3 0 0 0 12 5.5a3 3 0 0 0 2.488-1.045"/><path d="M12 5.5V12"/><path d="M12 12a6 6 0 1 0 6 6"/><path d="M12 12a6 6 0 1 1-6 6"/><path d="M12 12a6 6 0 1 0-6-6"/><path d="M12 12a6 6 0 1 1 6-6"/></svg>
                 </li>
                 <li class="nav-item disabled" data-tab="flights">
@@ -89,7 +89,7 @@
                 <form id="ai-planner-form">
                     <label for="duration">Quantos dias dura a viagem?</label>
                     <input type="number" id="duration" name="duration" placeholder="Ex: 7" required>
-
+                    
                     <label for="style">Qual o seu estilo de viagem?</label>
                     <select id="style" name="style">
                         <option value="economico">Económico</option>
@@ -103,7 +103,7 @@
 
                     <label for="extra-info">Informações adicionais:</label>
                     <textarea id="extra-info" name="extraInfo" placeholder="Ex: Viajo com crianças, prefiro evitar multidões..."></textarea>
-
+                    
                     <button type="submit" class="ai-button">Gerar Plano de Viagem com IA</button>
                     <div class="loading-indicator">A gerar o seu plano...</div>
                 </form>
@@ -173,8 +173,10 @@
     </template>
     <template id="documents-tab-template"><div><h3>Documentos - Em construção</h3></div></template>
     <template id="tripDashboard-tab-template"><div><h3>Dashboard da Viagem - Em construção</h3></div></template>
-
+    
     <!-- Link para o seu ficheiro de script -->
     <script src="script.js"></script>
 </body>
 </html>
+
+
