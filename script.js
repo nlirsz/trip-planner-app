@@ -1,7 +1,7 @@
-import { handleAuthStateChanges, login, signup, logout } from './auth.js';
-import { getTrips, createTrip, updateTrip } from './firestore.js';
-import { callGeminiAPI } from './api.js';
-import * as ui from './ui.js';
+import { handleAuthStateChanges, login, signup, logout } from './auth';
+import { getTrips, createTrip, updateTrip } from './firestore';
+import { callGeminiAPI } from './api';
+import * as ui from './ui';
 
 document.addEventListener('DOMContentLoaded', () => {
     // App state
