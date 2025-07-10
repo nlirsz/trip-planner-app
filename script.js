@@ -184,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     addTripButton.addEventListener('click', () => {
+        console.log('Botão Adicionar Viagem clicado!');
         addTripModal.classList.add('active');
         tripNameInput.value = '';
         tripDestinationInput.value = '';
