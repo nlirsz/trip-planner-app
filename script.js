@@ -32,6 +32,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const dayDetailModal = document.getElementById('day-detail-modal');
     const modalCloseButton = dayDetailModal.querySelector('.modal-close-button');
 
+    // Modal de adicionar viagem
+    let addTripModal = document.getElementById('add-trip-modal');
+    if (!addTripModal) {
+        addTripModal = document.createElement('div');
+        addTripModal.id = 'add-trip-modal';
+        addTripModal.innerHTML = `
+            <div class="modal-overlay"></div>
+            <div class="modal-content">
+                <button class="modal-close-button" id="close-add-trip-modal">&times;</button>
+                <h2>Adicionar Viagem</h2>
+                <form id="add-trip-form">
+                    <label>Nome da viagem:<br><input type="text" id="trip-name-input" required></label><br>
+                    <label>Destino:<br><input type="text" id="trip-destination-input" required></label><br>
+                    <button type="submit">Salvar</button>
+                </form>
+            </div>
+        `;
+        addTripModal.style.display = 'none';
+        addTripModal.style.position = 'fixed';
+        addTripModal.style.top = '0';
+        addTripModal.style.left = '0';
+        addTripModal.style.width = '100vw';
+        addTripModal.style.height = '100vh';
+        addTripModal.style.zIndex = '1000';
+        addTripModal.querySelector('.modal-overlay').style.position = 'absolute';
+        addTripModal.querySelector('.modal-overlay').style.top = '0';
+        addTripModal.querySelector('.modal-overlay').style.left = '0';
+        addTripModal.querySelector('.modal-overlay').style.width = '100vw';
+        addTripModal.querySelector('.modal-overlay').style.height = '100vh';
+        addTripModal.querySelector('.modal-overlay').style.background = 'rgba(0,0,0,0.5)';
+        addTripModal.querySelector('.modal-content').style.position = 'relative';
+        addTripModal.querySelector('.modal-content').style.margin = '10vh auto';
+        addTripModal.querySelector('.modal-content').style.background = '#fff';
+        addTripModal.querySelector('.modal-content').style.padding = '2rem';
+        addTripModal.querySelector('.modal-content').style.borderRadius = '8px';
+        addTripModal.querySelector('.modal-content').style.width = '90%';
+        addTripModal.querySelector('.modal-content').style.maxWidth = '400px';
+        document.body.appendChild(addTripModal);
+    }
+
     function saveData() {
         localStorage.setItem('trips', JSON.stringify(trips));
     }
@@ -181,16 +221,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     addTripButton.addEventListener('click', () => {
-        const name = prompt("Qual o nome da viagem?");
-        const destination = prompt("Qual o destino?");
+        addTripModal.style.display = 'block';
+        document.getElementById('trip-name-input').value = '';
+        document.getElementById('trip-destination-input').value = '';
+    });
+
+    // Fechar modal ao clicar no X ou fora do conteúdo
+    addTripModal.querySelector('#close-add-trip-modal').addEventListener('click', () => {
+        addTripModal.style.display = 'none';
+    });
+    addTripModal.querySelector('.modal-overlay').addEventListener('click', () => {
+        addTripModal.style.display = 'none';
+    });
+
+    // Lógica do formulário do modal
+    addTripModal.querySelector('#add-trip-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('trip-name-input').value.trim();
+        const destination = document.getElementById('trip-destination-input').value.trim();
         if (name && destination) {
-            trips.push({ 
-                id: Date.now(), name, destination, 
+            trips.push({
+                id: Date.now(), name, destination,
                 flights: [], accommodations: [], itinerary: [], packing: [], expenses: []
             });
-            selectTrip(trips[trips.length - 1].id); // Select the newly created trip
+            selectTrip(trips[trips.length - 1].id);
             saveData();
             renderTripDashboard();
+            addTripModal.style.display = 'none';
         }
     });
 
