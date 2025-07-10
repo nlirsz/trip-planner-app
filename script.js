@@ -139,7 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function selectTrip(tripId) {
         currentTripId = tripId;
         navItems.forEach(item => item.classList.remove('disabled'));
-        showTab('ai-planner'); 
+        // Mostra a primeira aba após criar a viagem (exemplo: itinerary)
+        showTab('itinerary');
     }
     
     function deselectTrip() {
