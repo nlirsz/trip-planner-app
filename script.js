@@ -16,7 +16,6 @@ const firebaseConfig = {
 };
 
 // ----> ADICIONE ESTA LINHA PARA VER O QUE ESTÁ A ACONTECER <----
-console.log('Valores carregados para a configuração:', firebaseConfig);
 
 // Inicializa o Firebase
 const app = initializeApp(firebaseConfig);
