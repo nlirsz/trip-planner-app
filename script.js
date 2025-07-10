@@ -1,24 +1,6 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: "meu-app-de-viagens.firebaseapp.com",
-  projectId: "meu-app-de-viagens",
-  storageBucket: "meu-app-de-viagens.firebasestorage.app",
-  messagingSenderId: "166110967251",
-  appId: "1:166110967251:web:775f5caa0e59aad6adab26",
-  measurementId: "G-D4X0EK5BQ3"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-getAnalytics(app);
+// Importa as configurações e o app inicializado do Firebase, e a chave do Gemini
+import { app, geminiApiKey } from './config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     let trips = JSON.parse(localStorage.getItem('trips')) || [];
@@ -31,6 +13,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabContents = document.querySelectorAll('.tab-content');
     const dayDetailModal = document.getElementById('day-detail-modal');
     const modalCloseButton = dayDetailModal.querySelector('.modal-close-button');
+    const tripCardTemplate = document.getElementById('trip-card-template');
+    if (!tripCardTemplate) {
+        const template = document.createElement('template');
+        template.id = 'trip-card-template';
+        template.innerHTML = `
+            <div class="trip-card">
+                <img class="card-image" src="https://placehold.co/600x400/1c1c1f/ffffff?text=Viagem" alt="Imagem da viagem">
+                <div class="card-content">
+                    <h2 class="country-name">Nome da viagem</h2>
+                    <p class="country-destination">Destino</p>
+                    <button class="manage-button">Gerenciar</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(template);
+    }
+
+    const analytics = app.analytics;
+    if (analytics) {
+        console.log("Firebase Analytics inicializado com sucesso.");
+    } else {
+        console.error("Falha ao inicializar Firebase Analytics.");
+    }
+    // Verifica se a chave da API do Gemini está configurada corretamente
 
     // Modal de adicionar viagem
     let addTripModal = document.getElementById('add-trip-modal');
@@ -77,22 +83,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function callGeminiAPI(prompt) {
-        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+        const apiKey = geminiApiKey;
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
         const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
 
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.json();
+            const errorMessage = errorBody.error?.message || `API Error: ${response.statusText}`;
+            console.error("Erro ao chamar a API do Gemini:", errorMessage);
+            throw new Error(`Falha na comunicação com a IA: ${errorMessage}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.candidates || result.candidates.length === 0) {
+            console.error("Resposta da IA inválida:", result);
+            throw new Error("A IA não retornou uma resposta válida. A requisição pode ter sido bloqueada.");
+        }
+
         try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
-            const result = await response.json();
             return result.candidates[0].content.parts[0].text;
         } catch (error) {
-            console.error("Erro ao chamar a API do Gemini:", error);
-            return "Desculpe, não consegui conectar com a IA no momento.";
+            console.error("Erro ao extrair texto da resposta da IA:", error);
+            throw new Error("Não foi possível processar a resposta da IA.");
         }
     }
     
@@ -271,49 +290,50 @@ document.addEventListener('DOMContentLoaded', () => {
             form.reset();
         } else if (form.id === 'ai-planner-form') {
             e.preventDefault();
-            const trip = trips.find(t => t.id === currentTripId);
-            if (!trip) return;
-            
             const loadingIndicator = form.querySelector('.loading-indicator');
-            loadingIndicator.style.display = 'block';
-            form.querySelector('button').disabled = true;
+            const submitButton = form.querySelector('button');
 
-            const formData = new FormData(form);
-            const duration = formData.get('duration');
-            const style = formData.get('style');
-            const interests = formData.get('interests');
-            const extraInfo = formData.get('extraInfo');
-
-            const prompt = `
-                Crie um plano de viagem para ${trip.destination} com duração de ${duration} dias.
-                O estilo da viagem é: ${style}.
-                Meus principais interesses são: ${interests}.
-                Informações adicionais: ${extraInfo}.
-
-                Gere uma resposta em formato JSON. O JSON deve ter três chaves principais: "itinerary", "accommodations", e "packing".
-                - A chave "itinerary" deve ser um array de objetos, onde cada objeto representa um dia e tem as propriedades "day" (número), "title" (um título curto para o dia), e "events" (um array de objetos, cada um com "time" e "description").
-                - A chave "accommodations" deve ser um array de objetos, cada um com uma propriedade "name" e "description".
-                - A chave "packing" deve ser um array de objetos, cada um com uma propriedade "item".
-                Não inclua nenhuma formatação markdown como \`\`\`json.
-            `;
-
-            const aiResponse = await callGeminiAPI(prompt);
-            
             try {
+                const trip = trips.find(t => t.id === currentTripId);
+                if (!trip) return;
+
+                loadingIndicator.style.display = 'block';
+                submitButton.disabled = true;
+
+                const formData = new FormData(form);
+                const duration = formData.get('duration');
+                const style = formData.get('style');
+                const interests = formData.get('interests');
+                const extraInfo = formData.get('extraInfo');
+
+                const prompt = `
+                    Crie um plano de viagem para ${trip.destination} com duração de ${duration} dias.
+                    O estilo da viagem é: ${style}.
+                    Meus principais interesses são: ${interests}.
+                    Informações adicionais: ${extraInfo}.
+
+                    Gere uma resposta em formato JSON. O JSON deve ter três chaves principais: "itinerary", "accommodations", e "packing".
+                    - A chave "itinerary" deve ser um array de objetos, onde cada objeto representa um dia e tem as propriedades "day" (número), "title" (um título curto para o dia), e "events" (um array de objetos, cada um com "time" e "description").
+                    - A chave "accommodations" deve ser um array de objetos, cada um com uma propriedade "name" e "description".
+                    - A chave "packing" deve ser um array de objetos, cada um com uma propriedade "item".
+                    Não inclua nenhuma formatação markdown como \`\`\`json.
+                `;
+
+                const aiResponse = await callGeminiAPI(prompt);
                 const plan = JSON.parse(aiResponse);
                 trip.itinerary = plan.itinerary || [];
                 trip.accommodations = plan.accommodations || [];
                 trip.packing = plan.packing || [];
-            } catch (err) {
-                console.error("Erro ao processar JSON da IA:", err);
-                alert("Não foi possível processar o plano da IA. Tente novamente.");
+                saveData();
+                alert('Plano de viagem gerado com sucesso! Verifique as abas correspondentes.');
+                showTab('itinerary');
+            } catch (error) {
+                console.error("Erro ao gerar plano de viagem:", error);
+                alert(`Não foi possível gerar o plano: ${error.message}`);
+            } finally {
+                loadingIndicator.style.display = 'none';
+                submitButton.disabled = false;
             }
-            
-            saveData();
-            alert('Plano de viagem gerado com sucesso! Verifique as abas correspondentes.');
-            loadingIndicator.style.display = 'none';
-            form.querySelector('button').disabled = false;
-            showTab('itinerary');
         }
     });
 
