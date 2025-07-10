@@ -187,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 id: Date.now(), name, destination, 
                 flights: [], accommodations: [], itinerary: [], packing: [], expenses: []
             });
+            selectTrip(trips[trips.length - 1].id); // Select the newly created trip
             saveData();
             renderTripDashboard();
         }
