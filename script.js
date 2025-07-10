@@ -1,4 +1,4 @@
-import { app } from './config.js';
+import { app } from './config';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
 import { getFirestore, doc, setDoc, collection, getDocs, updateDoc } from "firebase/firestore";
 
