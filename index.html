@@ -65,6 +65,23 @@
         </nav>
     </div>
 
+    <!-- MODAL PARA ADICIONAR VIAGEM -->
+    <div id="add-trip-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="close-add-trip-modal" class="modal-close-button">&times;</button>
+            <h2>Adicionar Nova Viagem</h2>
+            <form id="add-trip-form">
+                <div class="form-card">
+                    <label for="trip-name-input">Nome da Viagem</label>
+                    <input type="text" id="trip-name-input" placeholder="Ex: Férias na Praia" required>
+                    <label for="trip-destination-input">Destino</label>
+                    <input type="text" id="trip-destination-input" placeholder="Ex: Brasil" required>
+                    <button type="submit">Criar Viagem</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL PARA DETALHES DO DIA -->
     <div id="day-detail-modal" class="modal-overlay">
         <div class="modal-content">

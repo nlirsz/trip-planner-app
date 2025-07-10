@@ -193,8 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
     closeAddTripModalButton.addEventListener('click', () => {
         addTripModal.classList.remove('active');
     });
-    addTripModal.querySelector('.modal-overlay').addEventListener('click', () => {
-        addTripModal.classList.remove('active');
+    addTripModal.addEventListener('click', (e) => {
+        if (e.target === addTripModal) {
+            addTripModal.classList.remove('active');
+        }
     });
 
     // Lógica do formulário do modal
