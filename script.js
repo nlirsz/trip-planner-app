@@ -1,6 +1,6 @@
 
 // Importa as configurações e o app inicializado do Firebase, e a chave do Gemini
-import { app, geminiApiKey } from './config.js';
+import { geminiApiKey } from './config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     let trips = JSON.parse(localStorage.getItem('trips')) || [];
@@ -12,71 +12,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const navItems = document.querySelectorAll('.nav-item');
     const tabContents = document.querySelectorAll('.tab-content');
     const dayDetailModal = document.getElementById('day-detail-modal');
-    const modalCloseButton = dayDetailModal.querySelector('.modal-close-button');
-    const tripCardTemplate = document.getElementById('trip-card-template');
-    if (!tripCardTemplate) {
-        const template = document.createElement('template');
-        template.id = 'trip-card-template';
-        template.innerHTML = `
-            <div class="trip-card">
-                <img class="card-image" src="https://placehold.co/600x400/1c1c1f/ffffff?text=Viagem" alt="Imagem da viagem">
-                <div class="card-content">
-                    <h2 class="country-name">Nome da viagem</h2>
-                    <p class="country-destination">Destino</p>
-                    <button class="manage-button">Gerenciar</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(template);
-    }
-
-    const analytics = app.analytics;
-    if (analytics) {
-        console.log("Firebase Analytics inicializado com sucesso.");
-    } else {
-        console.error("Falha ao inicializar Firebase Analytics.");
-    }
-    // Verifica se a chave da API do Gemini está configurada corretamente
+    const modalCloseButton = dayDetailModal.querySelector('.modal-close-button'); // Certifique-se de que este elemento existe no HTML
 
     // Modal de adicionar viagem
-    let addTripModal = document.getElementById('add-trip-modal');
-    if (!addTripModal) {
-        addTripModal = document.createElement('div');
-        addTripModal.id = 'add-trip-modal';
-        addTripModal.innerHTML = `
-            <div class="modal-overlay"></div>
-            <div class="modal-content">
-                <button class="modal-close-button" id="close-add-trip-modal">&times;</button>
-                <h2>Adicionar Viagem</h2>
-                <form id="add-trip-form">
-                    <label>Nome da viagem:<br><input type="text" id="trip-name-input" required></label><br>
-                    <label>Destino:<br><input type="text" id="trip-destination-input" required></label><br>
-                    <button type="submit">Salvar</button>
-                </form>
-            </div>
-        `;
-        addTripModal.style.display = 'none';
-        addTripModal.style.position = 'fixed';
-        addTripModal.style.top = '0';
-        addTripModal.style.left = '0';
-        addTripModal.style.width = '100vw';
-        addTripModal.style.height = '100vh';
-        addTripModal.style.zIndex = '1000';
-        addTripModal.querySelector('.modal-overlay').style.position = 'absolute';
-        addTripModal.querySelector('.modal-overlay').style.top = '0';
-        addTripModal.querySelector('.modal-overlay').style.left = '0';
-        addTripModal.querySelector('.modal-overlay').style.width = '100vw';
-        addTripModal.querySelector('.modal-overlay').style.height = '100vh';
-        addTripModal.querySelector('.modal-overlay').style.background = 'rgba(0,0,0,0.5)';
-        addTripModal.querySelector('.modal-content').style.position = 'relative';
-        addTripModal.querySelector('.modal-content').style.margin = '10vh auto';
-        addTripModal.querySelector('.modal-content').style.background = '#fff';
-        addTripModal.querySelector('.modal-content').style.padding = '2rem';
-        addTripModal.querySelector('.modal-content').style.borderRadius = '8px';
-        addTripModal.querySelector('.modal-content').style.width = '90%';
-        addTripModal.querySelector('.modal-content').style.maxWidth = '400px';
-        document.body.appendChild(addTripModal);
-    }
+    const addTripModal = document.getElementById('add-trip-modal');
+    const closeAddTripModalButton = document.getElementById('close-add-trip-modal');
+    const addTripForm = document.getElementById('add-trip-form');
+    const tripNameInput = document.getElementById('trip-name-input');
+    const tripDestinationInput = document.getElementById('trip-destination-input');
+
 
     function saveData() {
         localStorage.setItem('trips', JSON.stringify(trips));
@@ -240,21 +184,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     addTripButton.addEventListener('click', () => {
-        addTripModal.style.display = 'block';
-        document.getElementById('trip-name-input').value = '';
-        document.getElementById('trip-destination-input').value = '';
+        addTripModal.classList.add('active');
+        tripNameInput.value = '';
+        tripDestinationInput.value = '';
     });
 
     // Fechar modal ao clicar no X ou fora do conteúdo
-    addTripModal.querySelector('#close-add-trip-modal').addEventListener('click', () => {
-        addTripModal.style.display = 'none';
+    closeAddTripModalButton.addEventListener('click', () => {
+        addTripModal.classList.remove('active');
     });
     addTripModal.querySelector('.modal-overlay').addEventListener('click', () => {
-        addTripModal.style.display = 'none';
+        addTripModal.classList.remove('active');
     });
 
     // Lógica do formulário do modal
-    addTripModal.querySelector('#add-trip-form').addEventListener('submit', (e) => {
+    addTripForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const name = document.getElementById('trip-name-input').value.trim();
         const destination = document.getElementById('trip-destination-input').value.trim();
@@ -265,8 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             selectTrip(trips[trips.length - 1].id);
             saveData();
-            renderTripDashboard();
-            addTripModal.style.display = 'none';
+            renderTripDashboard(); // Atualiza o dashboard após adicionar a viagem
+            addTripModal.classList.remove('active');
         }
     });
 
