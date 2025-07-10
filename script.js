@@ -1,6 +1,6 @@
 
 // Importa as configurações e o app inicializado do Firebase, e a chave do Gemini
-import { geminiApiKey } from '../config.js';
+import { geminiApiKey } from './config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     let trips = JSON.parse(localStorage.getItem('trips')) || [];
