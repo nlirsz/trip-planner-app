@@ -98,7 +98,17 @@
                     <label for="trip-name-input">Nome da Viagem</label>
                     <input type="text" id="trip-name-input" placeholder="Ex: Férias na Praia" required>
                     <label for="trip-destination-input">Destino</label>
-                    <input type="text" id="trip-destination-input" placeholder="Ex: Brasil" required>
+                    <input type="text" id="trip-destination-input" placeholder="Ex: Grécia" required>
+                    <div class="date-inputs">
+                        <div>
+                            <label for="trip-start-date-input">Data de Início</label>
+                            <input type="date" id="trip-start-date-input" required>
+                        </div>
+                        <div>
+                            <label for="trip-end-date-input">Data de Fim</label>
+                            <input type="date" id="trip-end-date-input" required>
+                        </div>
+                    </div>
                     <button type="submit">Criar Viagem</button>
                 </div>
             </form>
@@ -109,12 +119,27 @@
     <div id="day-detail-modal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close-button">&times;</button>
-            <h2 id="modal-day-title"></h2>
-            <div class="item-list"><ul id="modal-day-events"></ul></div>
+            <form id="day-detail-form">
+                <input type="text" id="modal-day-title-input" class="modal-title-input" readonly>
+                <div id="modal-day-events-container" class="item-list">
+                    <!-- Eventos do dia serão inseridos aqui -->
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="edit-day-button">Editar</button>
+                    <button type="submit" id="save-day-button" style="display: none;">Salvar</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <!-- TEMPLATES -->
+    <template id="event-item-template">
+        <div class="event-item">
+            <input type="time" class="event-time-input" readonly>
+            <input type="text" class="event-description-input" readonly>
+            <button type="button" class="remove-event-button" style="display: none;">&times;</button>
+        </div>
+    </template>
     <template id="trip-card-template">
         <div class="trip-card">
             <div class="card-header"><span class="country-name"></span></div>
@@ -125,29 +150,73 @@
     <template id="ai-planner-tab-template">
         <div>
             <h3>Assistente de Planeamento IA</h3>
+            <p>Forneça o máximo de detalhes possível para um roteiro hiperpersonalizado.</p>
             <div class="form-card">
                 <form id="ai-planner-form">
-                    <label for="duration">Quantos dias dura a viagem?</label>
-                    <input type="number" id="duration" name="duration" placeholder="Ex: 7" required>
-                    
-                    <label for="style">Qual o seu estilo de viagem?</label>
-                    <select id="style" name="style">
-                        <option value="economico">Económico</option>
-                        <option value="equilibrado">Equilibrado</option>
-                        <option value="luxo">Luxo</option>
-                        <option value="aventura">Aventura</option>
-                    </select>
+                    <div class="form-section">
+                        <h4>Perfil da Viagem</h4>
+                        <label for="ai-travel-company">Vai viajar com quem?</label>
+                        <select id="ai-travel-company" name="travelCompany">
+                            <option value="sozinho">Sozinho(a)</option>
+                            <option value="casal">Em casal</option>
+                            <option value="amigos">Com amigos</option>
+                            <option value="familia">Em família</option>
+                        </select>
+                        <label for="ai-travel-style">Qual é o seu estilo de viagem?</label>
+                        <input type="text" id="ai-travel-style" name="travelStyle" placeholder="Ex: Gastronômico, cultural, aventura, relax" required>
+                        <label for="ai-daily-budget">Orçamento médio por dia (sem contar hospedagem)</label>
+                        <input type="number" id="ai-daily-budget" name="dailyBudget" placeholder="Ex: 150" required>
+                    </div>
 
-                    <label for="interests">Quais são os seus principais interesses?</label>
-                    <input type="text" id="interests" name="interests" placeholder="Ex: Museus, gastronomia, caminhadas" required>
+                    <div class="form-section">
+                        <h4>Interesses e Atividades</h4>
+                        <label for="ai-interests">Quais são seus principais interesses?</label>
+                        <textarea id="ai-interests" name="interests" rows="3" placeholder="Ex: Museus de arte moderna, fotografia, vinhos, história da Segunda Guerra, trilhas na natureza..."></textarea>
+                        <label for="ai-must-do">Tem alguma experiência ou atividade que faz questão de incluir?</label>
+                        <textarea id="ai-must-do" name="mustDo" rows="2" placeholder="Ex: Ir a um jogo de futebol, fazer um curso de culinária, visitar a Oktoberfest..."></textarea>
+                        <label for="ai-restrictions">Tem alguma restrição ou algo que NÃO gosta de fazer?</label>
+                        <textarea id="ai-restrictions" name="restrictions" rows="2" placeholder="Ex: Odeio museus parados, não como frutos do mar, não gosto de acordar cedo..."></textarea>
+                    </div>
 
-                    <label for="extra-info">Informações adicionais:</label>
-                    <textarea id="extra-info" name="extraInfo" placeholder="Ex: Viajo com crianças, prefiro evitar multidões..."></textarea>
+                    <div class="form-section">
+                        <h4>Logística e Ritmo</h4>
+                        <label for="ai-pace">Qual ritmo de viagem prefere?</label>
+                        <select id="ai-pace" name="pace">
+                            <option value="acordar_cedo">Acordar cedo e aproveitar o dia</option>
+                            <option value="comecar_tarde">Começar os passeios mais tarde (depois das 10h)</option>
+                            <option value="flexivel">Flexível</option>
+                        </select>
+                        <label for="ai-transport">Como pretende se locomover?</label>
+                        <select id="ai-transport" name="transport">
+                            <option value="transporte_publico">Principalmente transporte público</option>
+                            <option value="alugar_carro">Alugar um carro</option>
+                            <option value="misto">Misto (carro para passeios, público na cidade)</option>
+                        </select>
+                         <label for="ai-rest-time">Deseja que o roteiro inclua tempo para descanso?</label>
+                        <input type="checkbox" id="ai-rest-time" name="restTime" checked>
+                    </div>
                     
-                    <button type="submit" class="ai-button">Gerar Plano de Viagem com IA</button>
+                    <div class="form-section">
+                        <h4>Sugestões e Detalhes</h4>
+                        <label for="ai-schedule-detail">Nível de detalhe do cronograma:</label>
+                        <select id="ai-schedule-detail" name="scheduleDetail">
+                            <option value="hora_a_hora">Planejado hora a hora</option>
+                            <option value="blocos">Apenas blocos (manhã, tarde, noite)</option>
+                        </select>
+                        <label for="ai-extra-suggestions">Deseja sugestões extras?</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="ai-restaurants" name="suggestRestaurants" checked> <label for="ai-restaurants">Restaurantes</label>
+                            <input type="checkbox" id="ai-hotels" name="suggestHotels" checked> <label for="ai-hotels">Bairros para Hospedagem</label>
+                            <input type="checkbox" id="ai-nightlife" name="suggestNightlife"> <label for="ai-nightlife">Bares e Vida Noturna</label>
+                            <input type="checkbox" id="ai-shopping" name="suggestShopping"> <label for="ai-shopping">Compras</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="ai-button">Gerar Roteiro Hiperpersonalizado</button>
                     <div class="loading-indicator">A gerar o seu plano...</div>
                 </form>
             </div>
+            <div id="download-links-container"></div>
         </div>
     </template>
     <template id="flights-tab-template">
@@ -180,12 +249,29 @@
     </template>
     <template id="itinerary-tab-template">
         <div>
-            <h3>Itinerário Diário</h3>
-            <div class="itinerary-calendar">
-                <!-- Os cartões dos dias serão inseridos aqui -->
+            <div class="itinerary-header">
+                <h3>Itinerário Diário</h3>
+                <button id="chat-with-ai-button" class="ai-button">Conversar com IA para Refinar</button>
+            </div>
+            <div id="itinerary-table-container">
+                <!-- A tabela do itinerário será inserida aqui -->
             </div>
         </div>
     </template>
+
+    <!-- MODAL DE CHAT COM A IA -->
+    <div id="ai-chat-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="close-ai-chat-modal" class="modal-close-button">&times;</button>
+            <h2>Refinar Roteiro com IA</h2>
+            <div id="ai-chat-messages" class="chat-messages"></div>
+            <form id="ai-chat-form" class="chat-form">
+                <input type="text" id="ai-chat-input" placeholder="Digite sua solicitação (ex: 'Adicione um dia de descanso na quarta-feira')" required>
+                <button type="submit">Enviar</button>
+            </form>
+            <div class="loading-indicator">A IA está a pensar...</div>
+        </div>
+    </div>
     <template id="packing-tab-template">
         <div>
             <h3>Lista de Empacotamento</h3>
@@ -215,6 +301,6 @@
     <template id="tripDashboard-tab-template"><div><h3>Dashboard da Viagem - Em construção</h3></div></template>
     
     <!-- Link para o seu ficheiro de script -->
-    <script type="module" src="script.js"></script>
+    <script type="module" src="./script.js"></script>
 </body>
 </html>

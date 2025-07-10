@@ -50,6 +50,94 @@ export function setupLogoutButton(logoutHandler) {
 }
 
 
+let currentDayData = null; // Variável para guardar os dados do dia atual no modal
+
+export function getCurrentDayData() {
+    return currentDayData;
+}
+
+export function getUpdatedDayDetails() {
+    const title = document.getElementById('modal-day-title-input').value;
+    const eventItems = document.querySelectorAll('#modal-day-events-container .event-item');
+    const events = Array.from(eventItems).map(item => ({
+        time: item.querySelector('.event-time-input').value,
+        description: item.querySelector('.event-description-input').value
+    }));
+    return { ...currentDayData, title, events };
+}
+
+export function toggleDayModalEditMode(isEditMode) {
+    const titleInput = document.getElementById('modal-day-title-input');
+    const eventInputs = document.querySelectorAll('.event-time-input, .event-description-input');
+    const removeButtons = document.querySelectorAll('.remove-event-button');
+    const editButton = document.getElementById('edit-day-button');
+    const saveButton = document.getElementById('save-day-button');
+
+    titleInput.readOnly = !isEditMode;
+    eventInputs.forEach(input => input.readOnly = !isEditMode);
+    removeButtons.forEach(btn => btn.style.display = isEditMode ? 'inline-block' : 'none');
+    
+    editButton.style.display = isEditMode ? 'none' : 'inline-block';
+    saveButton.style.display = isEditMode ? 'inline-block' : 'none';
+}
+
+function populateDayDetailModal(dayData) {
+    currentDayData = dayData;
+    document.getElementById('modal-day-title-input').value = `Dia ${dayData.day}: ${dayData.title}`;
+    const eventsContainer = document.getElementById('modal-day-events-container');
+    eventsContainer.innerHTML = '';
+    const eventTemplate = document.getElementById('event-item-template');
+
+    dayData.events.forEach(event => {
+        const eventNode = eventTemplate.content.cloneNode(true);
+        eventNode.querySelector('.event-time-input').value = event.time || '';
+        eventNode.querySelector('.event-description-input').value = event.description || '';
+        eventNode.querySelector('.remove-event-button').onclick = (e) => e.target.closest('.event-item').remove();
+        eventsContainer.appendChild(eventNode);
+    });
+
+    toggleDayModalEditMode(false); // Garante que o modal abre em modo de visualização
+    dayDetailModal.classList.add('active');
+}
+
+// --- Itinerary Rendering ---
+function renderItineraryTable(container, tableMarkdown) {
+    if (!tableMarkdown) {
+        container.innerHTML = '<p>Gere um plano de viagem para ver o itinerário.</p>';
+        return;
+    }
+    // Basic markdown to HTML conversion for the table
+    let html = tableMarkdown
+        .replace(/^\|/gm, '<tr><td>')
+        .replace(/\|$/gm, '</td></tr>')
+        .replace(/\|/g, '</td><td>');
+    html = `<table><thead>${html.substring(0, html.indexOf('</tr>') + 5)}</thead><tbody>${html.substring(html.indexOf('</tr>') + 5)}</tbody></table>`;
+    // Clean up header row
+    html = html.replace(/<td>-----<\/td>/g, '');
+    container.innerHTML = html;
+}
+
+export function createDownloadLink(csvContent, fileName) {
+    const container = document.getElementById('download-links-container');
+    container.innerHTML = ''; // Clear previous links
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.href) {
+        URL.revokeObjectURL(link.href);
+    }
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.textContent = 'Baixar Geolocalizações (CSV)';
+    link.className = 'download-link';
+    container.appendChild(link);
+}
+
+export function clearDownloadLinks() {
+    const container = document.getElementById('download-links-container');
+    if(container) container.innerHTML = '';
+}
+
+
 // --- Trip Dashboard & Tabs ---
 
 export function renderTripDashboard(trips, selectTripHandler) {
@@ -87,16 +175,18 @@ export function renderTabContent(tabName, trip) {
     const tabNode = template.content.cloneNode(true);
 
     if (tabName === 'itinerary') {
-        const calendarContainer = tabNode.querySelector('.itinerary-calendar');
-        if (calendarContainer && trip.itinerary) {
-            calendarContainer.innerHTML = ''; // Clear previous content
-            trip.itinerary.forEach(day => {
-                const dayCard = document.createElement('div');
-                dayCard.className = 'day-card';
-                dayCard.innerHTML = `<div class="day-number">${day.day}</div><div class="day-title">${day.title}</div>`;
-                dayCard.addEventListener('click', () => showDayDetailModal(day));
-                calendarContainer.appendChild(dayCard);
-            });
+        const tableContainer = tabNode.querySelector('#itinerary-table-container');
+        if (tableContainer) {
+            renderItineraryTable(tableContainer, trip.itineraryTable);
+        }
+        const chatButton = tabNode.querySelector('#chat-with-ai-button');
+        if (chatButton) {
+            if (trip.itineraryTable) {
+                chatButton.style.display = 'block';
+                chatButton.addEventListener('click', () => showAIChatModal());
+            } else {
+                chatButton.style.display = 'none';
+            }
         }
     } else {
         const listContainer = tabNode.querySelector('.list-container');
@@ -133,28 +223,28 @@ export function showTab(tabId, trip) {
     }
 }
 
-export function deselectTrip(showTabHandler) {
+export function disableTripTabs() {
     navItems.forEach(item => {
         if (item.dataset.tab !== 'trips') item.classList.add('disabled');
     });
-    showTabHandler('trips');
 }
 
-export function selectTrip(showTabHandler) {
+export function enableTripTabs() {
     navItems.forEach(item => item.classList.remove('disabled'));
-    showTabHandler('itinerary');
 }
 
 
 // --- Modals ---
 
-export function setupModals() {
+export function setupModals(chatFormHandler) {
     // Day Detail Modal
     const modalCloseButton = dayDetailModal.querySelector('.modal-close-button');
     modalCloseButton.addEventListener('click', () => dayDetailModal.classList.remove('active'));
     dayDetailModal.addEventListener('click', (e) => {
         if (e.target === dayDetailModal) dayDetailModal.classList.remove('active');
     });
+    document.getElementById('edit-day-button').addEventListener('click', () => toggleDayModalEditMode(true));
+
 
     // Add Trip Modal
     const closeAddTripModalButton = document.getElementById('close-add-trip-modal');
@@ -163,19 +253,39 @@ export function setupModals() {
     addTripModal.addEventListener('click', (e) => {
         if (e.target === addTripModal) addTripModal.classList.remove('active');
     });
+
+    // AI Chat Modal
+    const aiChatModal = document.getElementById('ai-chat-modal');
+    const closeAIChatModalButton = document.getElementById('close-ai-chat-modal');
+    closeAIChatModalButton.addEventListener('click', () => aiChatModal.classList.remove('active'));
+    aiChatModal.addEventListener('click', (e) => {
+        if (e.target === aiChatModal) aiChatModal.classList.remove('active');
+    });
+    document.getElementById('ai-chat-form').addEventListener('submit', chatFormHandler);
 }
 
-function showDayDetailModal(dayData) {
-    document.getElementById('modal-day-title').textContent = `Dia ${dayData.day}: ${dayData.title}`;
-    const eventsList = document.getElementById('modal-day-events');
-    eventsList.innerHTML = '';
-    dayData.events.forEach(event => {
-        const li = document.createElement('li');
-        li.innerHTML = `<strong>${event.time || ''}</strong> - ${event.description}`;
-        eventsList.appendChild(li);
-    });
-    dayDetailModal.classList.add('active');
+// --- AI Chat UI ---
+
+export function showAIChatModal() {
+    document.getElementById('ai-chat-modal').classList.add('active');
 }
+
+export function addChatMessage(sender, message) {
+    const chatMessages = document.getElementById('ai-chat-messages');
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('chat-message', `${sender}-message`);
+    messageElement.textContent = message;
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+}
+
+export function setAIChatLoading(isLoading) {
+    const form = document.getElementById('ai-chat-form');
+    const loadingIndicator = form.nextElementSibling; // Assumes loading indicator is next sibling
+    form.querySelector('button').disabled = isLoading;
+    loadingIndicator.style.display = isLoading ? 'block' : 'none';
+}
+
 
 export function hideAddTripModal() {
     addTripModal.classList.remove('active');
