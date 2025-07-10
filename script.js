@@ -2,6 +2,8 @@ import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
 import { getFirestore, doc, setDoc, collection, getDocs, updateDoc } from "firebase/firestore";
 
+// ... (seu código anterior)
+
 // Configuração do Firebase a partir de Variáveis de Ambiente
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,9 +15,13 @@ const firebaseConfig = {
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
+// ----> ADICIONE ESTA LINHA PARA VER O QUE ESTÁ A ACONTECER <----
+console.log('Valores carregados para a configuração:', firebaseConfig);
+
 // Inicializa o Firebase
 const app = initializeApp(firebaseConfig);
 
+// ... (resto do seu código)
 document.addEventListener('DOMContentLoaded', () => {
     const auth = getAuth(app);
     const db = getFirestore(app);
