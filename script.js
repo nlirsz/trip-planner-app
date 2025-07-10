@@ -1,7 +1,3 @@
-
-// Importa as configurações e o app inicializado do Firebase, e a chave do Gemini
-import { geminiApiKey } from './config.js';
-
 document.addEventListener('DOMContentLoaded', () => {
     let trips = JSON.parse(localStorage.getItem('trips')) || [];
     let currentTripId = null; 
@@ -27,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function callGeminiAPI(prompt) {
-        const apiKey = geminiApiKey;
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
         const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
 
