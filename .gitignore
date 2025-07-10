@@ -1,9 +1,14 @@
+# Ficheiros de configuração e segredos
+# A linha mais importante! Impede que o seu ficheiro .env com as chaves do Firebase
+# seja enviado para o GitHub.
+.env
+.env.local
+.env.*.local
 
+# Ficheiro de configuração local que você mencionou
 config.js
 
-.env
-
-# Logs
+# Logs de erros e depuração
 logs
 *.log
 npm-debug.log*
@@ -12,16 +17,22 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependências do Node.js
+# Pasta que contém todas as bibliotecas e pacotes. É muito pesada e
+# deve ser reinstalada em cada ambiente (local e na Vercel) com 'npm install'.
 node_modules
+
+# Pasta de build de produção
+# O Vite cria esta pasta com os ficheiros otimizados para a Vercel.
+# Não precisa de ser guardada no GitHub.
 dist
 dist-ssr
-*.local
 
-# Editor directories and files
+# Ficheiros temporários e de configuração do sistema operativo e editores
+.DS_Store
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
