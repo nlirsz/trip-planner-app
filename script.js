@@ -1,5 +1,13 @@
+import { app } from './config.js';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
+import { getFirestore, doc, setDoc, collection, getDocs, updateDoc } from "firebase/firestore";
+
 document.addEventListener('DOMContentLoaded', () => {
-    let trips = JSON.parse(localStorage.getItem('trips')) || [];
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    let currentUser = null;
+
+    let trips = []; // Os dados agora virão do Firestore
     let currentTripId = null; 
 
     const mainTitle = document.getElementById('main-title');
@@ -18,9 +26,77 @@ document.addEventListener('DOMContentLoaded', () => {
     const tripDestinationInput = document.getElementById('trip-destination-input');
 
 
-    function saveData() {
-        localStorage.setItem('trips', JSON.stringify(trips));
+    // Lógica de autenticação
+    const authContainer = document.getElementById('auth-container');
+    const appContainer = document.querySelector('.app-container');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const showSignup = document.getElementById('show-signup');
+    const showLogin = document.getElementById('show-login');
+    const logoutButton = document.createElement('button'); // Botão de logout a ser adicionado
+    logoutButton.textContent = 'Sair';
+    logoutButton.className = 'logout-button'; // Adicione uma classe para estilização
+
+    showSignup.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('login-form-container').style.display = 'none';
+        document.getElementById('signup-form-container').style.display = 'block';
+    });
+
+    showLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('signup-form-container').style.display = 'none';
+        document.getElementById('login-form-container').style.display = 'block';
+    });
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        signInWithEmailAndPassword(auth, email, password)
+            .catch(error => alert(`Erro no login: ${error.message}`));
+    });
+
+    signupForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+        createUserWithEmailAndPassword(auth, email, password)
+            .catch(error => alert(`Erro no cadastro: ${error.message}`));
+    });
+
+    logoutButton.addEventListener('click', () => {
+        signOut(auth);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            authContainer.classList.remove('active');
+            appContainer.classList.add('active');
+            document.querySelector('.main-header').appendChild(logoutButton); // Adiciona o botão de logout
+            loadTrips(); // Carrega as viagens do usuário
+        } else {
+            currentUser = null;
+            authContainer.classList.add('active');
+            appContainer.classList.remove('active');
+            if(document.querySelector('.logout-button')) {
+                document.querySelector('.main-header').removeChild(logoutButton);
+            }
+            trips = [];
+            renderTripDashboard();
+        }
+    });
+
+    async function loadTrips() {
+        if (!currentUser) return;
+        const tripsCol = collection(db, "users", currentUser.uid, "trips");
+        const tripSnapshot = await getDocs(tripsCol);
+        trips = tripSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderTripDashboard();
     }
+
+    
 
     async function callGeminiAPI(prompt) {
         const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -197,18 +273,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Lógica do formulário do modal
-    addTripForm.addEventListener('submit', (e) => {
+    addTripForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('trip-name-input').value.trim();
         const destination = document.getElementById('trip-destination-input').value.trim();
-        if (name && destination) {
-            trips.push({
-                id: Date.now(), name, destination,
-                flights: [], accommodations: [], itinerary: [], packing: [], expenses: []
-            });
-            selectTrip(trips[trips.length - 1].id);
-            saveData();
-            renderTripDashboard(); // Atualiza o dashboard após adicionar a viagem
+        if (name && destination && currentUser) {
+            const newTrip = {
+                id: Date.now().toString(), // Salva o ID como string
+                name,
+                destination,
+                flights: [],
+                accommodations: [],
+                itinerary: [],
+                packing: [],
+                expenses: []
+            };
+            await setDoc(doc(db, "users", currentUser.uid, "trips", newTrip.id), newTrip);
+            trips.push(newTrip);
+            selectTrip(newTrip.id);
+            renderTripDashboard();
             addTripModal.classList.remove('active');
         }
     });
@@ -219,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const type = form.dataset.type;
             const trip = trips.find(t => t.id === currentTripId);
-            if (!trip) return;
+            if (!trip || !currentUser) return;
 
             const formData = new FormData(form);
             const newItem = {};
@@ -227,8 +310,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (!trip[type]) trip[type] = [];
             trip[type].push(newItem);
+
+            const tripRef = doc(db, "users", currentUser.uid, "trips", trip.id);
+            await updateDoc(tripRef, { [type]: trip[type] });
             
-            saveData();
             renderTabContent(type);
             form.reset();
         } else if (form.id === 'ai-planner-form') {
@@ -264,10 +349,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const aiResponse = await callGeminiAPI(prompt);
                 const plan = JSON.parse(aiResponse);
+
                 trip.itinerary = plan.itinerary || [];
                 trip.accommodations = plan.accommodations || [];
                 trip.packing = plan.packing || [];
-                saveData();
+
+                const tripRef = doc(db, "users", currentUser.uid, "trips", trip.id);
+                await updateDoc(tripRef, {
+                    itinerary: trip.itinerary,
+                    accommodations: trip.accommodations,
+                    packing: trip.packing
+                });
+
                 alert('Plano de viagem gerado com sucesso! Verifique as abas correspondentes.');
                 showTab('itinerary');
             } catch (error) {

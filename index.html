@@ -7,8 +7,31 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- TELA DE LOGIN -->
+    <div id="auth-container" class="active">
+        <div class="auth-form-container">
+            <div id="login-form-container">
+                <h2>Login</h2>
+                <form id="login-form">
+                    <input type="email" id="login-email" placeholder="Email" required>
+                    <input type="password" id="login-password" placeholder="Senha" required>
+                    <button type="submit">Entrar</button>
+                    <p>Não tem uma conta? <a href="#" id="show-signup">Cadastre-se</a></p>
+                </form>
+            </div>
+            <div id="signup-form-container" style="display: none;">
+                <h2>Cadastro</h2>
+                <form id="signup-form">
+                    <input type="email" id="signup-email" placeholder="Email" required>
+                    <input type="password" id="signup-password" placeholder="Senha (mínimo 6 caracteres)" required>
+                    <button type="submit">Cadastrar</button>
+                    <p>Já tem uma conta? <a href="#" id="show-login">Faça o login</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
 
-    <div class="app-container">
+    <div class="app-container" style="display: none;">
         <!-- CABEÇALHO -->
         <header class="main-header">
             <div class="title-container">
