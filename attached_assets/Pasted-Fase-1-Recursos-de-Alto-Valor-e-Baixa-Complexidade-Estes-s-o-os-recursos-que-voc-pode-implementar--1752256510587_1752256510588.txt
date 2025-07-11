@@ -1,0 +1,59 @@
+Fase 1: Recursos de Alto Valor e Baixa Complexidade
+Estes são os recursos que você pode implementar relativamente rápido e que trarão um grande benefício para o usuário.
+
+Gestão de Documentos com Upload de Arquivos:
+
+Visão: Você já tem uma aba "Documentos" no index.html. Permitir que o usuário faça upload de PDFs (reservas, passaportes, vistos) é um passo natural e muito útil.
+
+Sugestão Técnica: Use o Firebase Storage. Ele foi projetado para funcionar perfeitamente com o Firestore e a Autenticação do Firebase que você já está usando. A implementação seria criar uma função para fazer o upload do arquivo e associar o link de armazenamento ao ID da viagem no Firestore.
+
+Integração com Calendário (via arquivo .ics):
+
+Visão: Permitir que o usuário adicione a viagem ao seu calendário pessoal é um recurso de grande conveniência.
+
+Sugestão Técnica: Em vez de uma integração completa e complexa com a API do Google Calendar, um primeiro passo excelente é gerar um arquivo .ics. Este é um formato universal que pode ser importado para o Google Calendar, Apple Calendar, Outlook, etc. Você pode criar um botão "Adicionar ao Calendário" que gera este arquivo com as datas de início e fim da viagem.
+
+Fase 2: Aprimorando a Inteligência e o Gerenciamento
+Estes recursos aprofundam a personalização e o controle do usuário sobre suas viagens.
+
+Personalização Avançada da IA com Histórico:
+
+Visão: Este é o caminho para tornar seu app verdadeiramente "inteligente".
+
+Sugestão Técnica: Evolua seu modelo de dados no firestore.js. Crie uma coleção separada para userPreferences ou adicione um campo no perfil do usuário. Após cada viagem, você poderia usar a IA para resumir os "highlights" e salvar os estilos de viagem e interesses (travelStyle, interests) que o usuário realmente usou. Para novas viagens, o prompt para a Gemini API em script.js incluiria uma seção "Histórico de Preferências do Usuário" para gerar roteiros ainda mais alinhados.
+
+Recursos Sociais (Compartilhamento de Roteiros):
+
+Visão: Ótima maneira de promover o crescimento orgânico do seu app.
+
+Sugestão Técnica: Crie uma página ou uma visualização "pública" e somente leitura para um roteiro. Ao clicar em "Compartilhar", você geraria um link único para essa visualização. Isso pode ser feito usando as Regras de Segurança do Firebase para permitir acesso público de leitura a documentos específicos.
+
+Fase 3: Grandes Funcionalidades Estruturais
+Estes são os recursos mais complexos que podem exigir alterações significativas na arquitetura do seu aplicativo.
+
+Planejamento de Viagens com Múltiplas Cidades:
+
+Visão: Um recurso poderoso, mas que impacta profundamente o app.
+
+Sugestão Técnica: Isso exigirá uma refatoração do seu modelo de dados em firestore.js. Em vez de um único campo destination, sua trip precisaria de um array de cities ou legs, onde cada um tem seu próprio destino, datas, roteiro, etc. O formulário de criação de viagem e a lógica de geração de roteiro da IA precisariam ser completamente adaptados para lidar com essa nova estrutura.
+
+Funcionalidade Offline com Service Workers:
+
+Visão: Extremamente útil para um app de viagens, já que o acesso à internet pode ser instável no exterior.
+
+Sugestão Técnica: Esta é uma tarefa avançada. Envolve a implementação de um Service Worker para armazenar em cache os dados da viagem (roteiro, documentos) no dispositivo do usuário, permitindo o acesso offline. O vite.config.js pode ser configurado com plugins (como vite-plugin-pwa) para ajudar a automatizar a geração do service worker.
+
+Fase 4: Integrações com APIs de Terceiros
+Estas integrações podem ser complexas e dependem de serviços externos.
+
+Rastreamento de Despesas em Tempo Real (Wise API):
+
+Visão: Um recurso "premium" muito poderoso.
+
+Sugestão Técnica: Após pesquisar a documentação da Wise API, a integração é factível, mas exigirá um fluxo de autenticação seguro (provavelmente OAuth2) para que os usuários conectem suas contas. Recomendo começar com o rastreamento manual de despesas que você já planejou no expenses-tab-template e, em seguida, adicionar a integração com a Wise como um aprimoramento.
+
+Detalhes Avançados de Voos (Google Maps Integration):
+
+Visão: Fornece informações valiosas e em tempo real.
+
+Sugestão Técnica: Para obter detalhes de voos em tempo real (portão de embarque, atrasos), você precisaria de uma API de aviação específica (ex: AviationStack, FlightAware). A integração com o Google Maps pode ser usada para visualizar o trajeto do voo, mostrar a localização do aeroporto ou até mesmo o caminho do aeroporto para o hotel.

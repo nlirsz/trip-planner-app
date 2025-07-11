@@ -1,0 +1,93 @@
+# Prompt para Geração de Aplicação Web de Assistente de Viagem
+
+Desenvolva uma aplicação web responsiva (mobile-first) de assistente de viagem, usando Next.js (React + TypeScript) e Tailwind CSS com glassmorphism inspirado no novo design da Apple. O foco inicial é web, mas com @mobile e totalmente adaptável a telas de celular e tablet. Persista dados em Firebase (Auth, Firestore, Storage) e gere sugestões inteligentes via API Gemini.
+
+---
+
+## Estrutura de Páginas e Abas
+
+1. **Nova Viagem (Formulário)**  
+   - Destinos (lista, seleção em mapa)  
+   - Data de início e fim  
+   - Perfil de viajante (gostos, interesses, aversões)  
+   - Atividades indesejadas  
+   - Pontos de interesse específicos  
+   - Campo “Outras informações”  
+   - Ao submeter, criar registro em Firestore
+
+2. **Abas de Navegação (Tabs)**  
+   - Configure uma barra fixa no topo ou bottom nav para web/mobile  
+
+   1. **Painel de Viagens**  
+      - Grid/lista com todas as viagens  
+      - Busca e filtros (data, status: pendente, em andamento, finalizada)  
+      - Ações: editar, excluir, visualizar  
+
+   2. **Detalhes do Voo**  
+      - Integração Google Maps para mostrar aeroportos de ida e volta  
+      - Campos: número do voo, companhia, horários, terminais  
+      - Cálculo de distância: aeroporto ⇄ 1º hotel e último hotel ⇄ aeroporto de retorno  
+      - Suporte a aeroportos distintos para ida e volta  
+
+   3. **Hospedagens**  
+      - Seção “Minhas Reservas”: upload de PDFs (vouchers) para Firebase Storage  
+      - Seção “Sugestões da IA”: recomendações geradas pela Gemini com base no perfil  
+      - Informações de cada hospedagem: nome, endereço, check-in/out, horários  
+
+   4. **Cronograma de Viagem**  
+      - Calendário interativo (view mensal e diária) com cidade marcada em cada data  
+      - Ao clicar no dia: agenda hora a hora  
+      - Atividades sugeridas pela IA (restaurantes, passeios, transporte) conforme formulário  
+      - Drag & drop para reorganizar blocos de atividades  
+
+   5. **Checklist de Bagagem**  
+      - Geração automática de itens com base em destino, duração e previsão do tempo (OpenWeatherMap)  
+      - Seção de personalização: adicionar/remover itens  
+      - Barra de progresso (% de itens marcados)  
+
+   6. **Controle de Gastos**  
+      - Integração com API da Wise:  
+        - Autenticação OAuth2, polling ou webhooks para transações em tempo real  
+        - Exibição de saldo no cartão Wise e conversão de moedas em tempo real  
+      - Registro manual de despesas (valor, categoria: alimentação, transporte, lazer, compras)  
+      - Gráficos interativos: gastos por dia, cidade e categoria  
+
+   7. **Checklist de Documentos**  
+      - Lista padrão: passaporte, visto, vacinas, CNH etc.  
+      - Itens “marcáveis” e upload de digitalizações (fotos ou PDFs)  
+
+   8. **Dashboard Resumido**  
+      - Cards em glassmorphism com:  
+        - Próximos eventos no cronograma  
+        - Total de gastos vs. orçamento  
+        - Status de checklists (bagagem e documentos)  
+        - Notificações (alertas de voo, check-in, lembretes)  
+
+---
+
+## Requisitos Técnicos
+
+- Next.js (React + TypeScript) com SSR/SSG conforme necessidade  
+- Tailwind CSS + `backdrop-filter` para glassmorphism  
+- React Query (ou SWR) para cache e sincronização de dados  
+- Firebase:  
+  - Authentication (e-mail, OAuth social)  
+  - Firestore para dados estruturados  
+  - Storage para uploads de PDFs e imagens  
+- API Gemini para gerar sugestões de hospedagens, roteiros e cronogramas detalhados  
+- Google Maps JavaScript API para mapas e cálculo de rotas/distâncias  
+- OpenWeatherMap (ou similar) para previsão de temperatura  
+- API da Wise:  
+  - OAuth2 para autenticação de usuário  
+  - Polling ou webhooks para capturar transações em tempo real  
+  - Endpoints de saldo, histórico de transações e conversão de câmbio  
+
+---
+
+## Entregáveis
+
+- Repositório GitHub com código organizado em módulos e branches por feature  
+- README detalhado: configuração de Firebase, Gemini e Wise API  
+- Protótipo no Figma ou link de Preview do Next.js ilustrando todos os fluxos  
+- Testes unitários e de integração (Jest + React Testing Library)  
+- Deploy contínuo configurado (Vercel ou Netlify)  
