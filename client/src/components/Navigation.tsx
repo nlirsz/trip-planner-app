@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Plane, Home, Plus, Briefcase, FileText, Bell, User } from "lucide-react";
+import { Plane, Home, Plus, Briefcase, FileText, Bell, User, MapPin, Calendar, DollarSign, CheckSquare, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavigationProps {
@@ -13,9 +13,13 @@ export function Navigation({ onSectionChange, currentSection }: NavigationProps)
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
-    { id: "create-trip", label: "New Trip", icon: Plus },
-    { id: "my-trips", label: "My Trips", icon: Briefcase },
-    { id: "documents", label: "Documents", icon: FileText },
+    { id: "my-trips", label: "Viagens", icon: Briefcase },
+    { id: "flight-details", label: "Voos", icon: Plane },
+    { id: "accommodations", label: "Hospedagens", icon: MapPin },
+    { id: "itinerary", label: "Cronograma", icon: Calendar },
+    { id: "packing", label: "Mala", icon: CheckSquare },
+    { id: "expenses", label: "Gastos", icon: DollarSign },
+    { id: "travel-docs", label: "Documentos", icon: FileText },
   ];
 
   return (

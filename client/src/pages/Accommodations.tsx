@@ -1,0 +1,314 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { GlassCard } from "@/components/GlassCard";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MapPin, Calendar, Clock, Star, Wifi, Car, Coffee, Plus, FileText, Sparkles } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+interface AccommodationsProps {
+  onNavigate: (section: string) => void;
+}
+
+export function Accommodations({ onNavigate }: AccommodationsProps) {
+  const [selectedTrip, setSelectedTrip] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<"booked" | "suggestions">("booked");
+
+  const { data: trips = [], isLoading } = useQuery({
+    queryKey: ["/api/trips"],
+    enabled: true,
+  });
+
+  const { data: accommodations = [] } = useQuery({
+    queryKey: ["/api/accommodations", selectedTrip],
+    enabled: !!selectedTrip,
+  });
+
+  const bookedAccommodations = accommodations.filter((acc: any) => acc.type === "booked");
+  const suggestedAccommodations = accommodations.filter((acc: any) => acc.type === "suggestion");
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center text-white">Carregando...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 pb-20 md:pb-8">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-white mb-2">Hospedagens</h2>
+        <p className="text-white/70">Gerencie suas reservas e veja sugestões da IA</p>
+      </div>
+
+      {/* Trip Selection */}
+      <div className="mb-6">
+        <GlassCard className="p-6">
+          <h3 className="text-xl font-semibold text-[#1A202C] mb-4">Selecione uma Viagem</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {trips.map((trip: any) => (
+              <button
+                key={trip.id}
+                onClick={() => setSelectedTrip(trip.id)}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  selectedTrip === trip.id
+                    ? "border-[#667EEA] bg-[#667EEA]/10"
+                    : "border-gray-200 hover:border-[#667EEA]/50"
+                }`}
+              >
+                <div className="text-left">
+                  <h4 className="font-semibold text-[#1A202C]">{trip.name}</h4>
+                  <p className="text-sm text-gray-600">{trip.destination}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {format(new Date(trip.startDate), "dd/MM/yyyy", { locale: ptBR })} - {format(new Date(trip.endDate), "dd/MM/yyyy", { locale: ptBR })}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </GlassCard>
+      </div>
+
+      {selectedTrip && (
+        <div className="space-y-6">
+          {/* Tab Navigation */}
+          <div className="flex space-x-1 bg-white/10 backdrop-blur-sm rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab("booked")}
+              className={`px-4 py-2 rounded-md transition-all duration-200 flex items-center space-x-2 ${
+                activeTab === "booked"
+                  ? "text-white bg-white/20"
+                  : "text-white/70 hover:text-white hover:bg-white/20"
+              }`}
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Reservas Confirmadas</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("suggestions")}
+              className={`px-4 py-2 rounded-md transition-all duration-200 flex items-center space-x-2 ${
+                activeTab === "suggestions"
+                  ? "text-white bg-white/20"
+                  : "text-white/70 hover:text-white hover:bg-white/20"
+              }`}
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Sugestões da IA</span>
+            </button>
+          </div>
+
+          {/* Booked Accommodations */}
+          {activeTab === "booked" && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold text-white">Suas Reservas</h3>
+                <Button className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Reserva
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {bookedAccommodations.length === 0 ? (
+                  <div className="lg:col-span-2">
+                    <GlassCard className="p-8 text-center">
+                      <MapPin className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-[#1A202C] mb-2">Nenhuma reserva adicionada</h3>
+                      <p className="text-gray-600 mb-4">Adicione suas reservas de hotel para organizar melhor sua viagem</p>
+                      <Button className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Adicionar Primeira Reserva
+                      </Button>
+                    </GlassCard>
+                  </div>
+                ) : (
+                  bookedAccommodations.map((accommodation: any) => (
+                    <GlassCard key={accommodation.id} className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <Badge variant="default">CONFIRMADO</Badge>
+                        <div className="flex items-center">
+                          <Star className="w-4 h-4 text-yellow-500 mr-1" />
+                          <span className="text-sm text-gray-600">4.8</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="text-lg font-semibold text-[#1A202C]">{accommodation.name}</h4>
+                          <p className="text-sm text-gray-600 flex items-center">
+                            <MapPin className="w-4 h-4 mr-1" />
+                            {accommodation.address}, {accommodation.city}
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-xs text-gray-600 uppercase">Check-in</Label>
+                            <div className="font-semibold">
+                              {format(new Date(accommodation.checkIn), "dd/MM/yyyy", { locale: ptBR })}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              {accommodation.checkInTime || "15:00"}
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-gray-600 uppercase">Check-out</Label>
+                            <div className="font-semibold">
+                              {format(new Date(accommodation.checkOut), "dd/MM/yyyy", { locale: ptBR })}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              {accommodation.checkOutTime || "11:00"}
+                            </div>
+                          </div>
+                        </div>
+
+                        <Separator />
+
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Preço:</span>
+                            <span className="font-semibold">{accommodation.price || "R$ 250/noite"}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Código:</span>
+                            <span className="font-semibold">{accommodation.confirmationCode || "N/A"}</span>
+                          </div>
+                        </div>
+
+                        {/* Amenities */}
+                        <div className="flex flex-wrap gap-2 mt-4">
+                          <Badge variant="outline" className="flex items-center">
+                            <Wifi className="w-3 h-3 mr-1" />
+                            Wi-Fi
+                          </Badge>
+                          <Badge variant="outline" className="flex items-center">
+                            <Car className="w-3 h-3 mr-1" />
+                            Estacionamento
+                          </Badge>
+                          <Badge variant="outline" className="flex items-center">
+                            <Coffee className="w-3 h-3 mr-1" />
+                            Café da Manhã
+                          </Badge>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex space-x-2 mt-4">
+                          <Button size="sm" variant="outline" className="flex-1">
+                            <FileText className="w-4 h-4 mr-2" />
+                            Upload PDF
+                          </Button>
+                          <Button size="sm" variant="outline" className="flex-1">
+                            <MapPin className="w-4 h-4 mr-2" />
+                            Ver Mapa
+                          </Button>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* AI Suggestions */}
+          {activeTab === "suggestions" && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold text-white">Sugestões da IA</h3>
+                <Button className="bg-[#F093FB] hover:bg-[#F093FB]/90 text-white">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Gerar Novas Sugestões
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {/* Demo suggestions */}
+                {[
+                  {
+                    id: 1,
+                    name: "Hotel Boutique Central",
+                    address: "Rua das Flores, 123",
+                    city: "São Paulo",
+                    price: "R$ 280/noite",
+                    rating: 4.7,
+                    amenities: ["Wi-Fi", "Piscina", "Spa"],
+                    image: "/api/placeholder/300/200"
+                  },
+                  {
+                    id: 2,
+                    name: "Pousada Vista Mar",
+                    address: "Av. Beira Mar, 456",
+                    city: "Rio de Janeiro", 
+                    price: "R$ 320/noite",
+                    rating: 4.9,
+                    amenities: ["Wi-Fi", "Praia", "Café"],
+                    image: "/api/placeholder/300/200"
+                  },
+                  {
+                    id: 3,
+                    name: "Hostel Moderno",
+                    address: "Rua Jovem, 789",
+                    city: "São Paulo",
+                    price: "R$ 85/noite",
+                    rating: 4.3,
+                    amenities: ["Wi-Fi", "Cozinha", "Lavanderia"],
+                    image: "/api/placeholder/300/200"
+                  }
+                ].map((suggestion) => (
+                  <GlassCard key={suggestion.id} className="p-4">
+                    <div className="space-y-4">
+                      <div className="aspect-video bg-gray-200 rounded-lg flex items-center justify-center">
+                        <MapPin className="w-8 h-8 text-gray-400" />
+                      </div>
+                      
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-[#1A202C]">{suggestion.name}</h4>
+                          <div className="flex items-center">
+                            <Star className="w-4 h-4 text-yellow-500 mr-1" />
+                            <span className="text-sm text-gray-600">{suggestion.rating}</span>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 flex items-center">
+                          <MapPin className="w-4 h-4 mr-1" />
+                          {suggestion.address}, {suggestion.city}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-semibold text-[#667EEA]">{suggestion.price}</span>
+                        <Badge variant="secondary">IA</Badge>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1">
+                        {suggestion.amenities.map((amenity, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {amenity}
+                          </Badge>
+                        ))}
+                      </div>
+
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline" className="flex-1">
+                          Ver Detalhes
+                        </Button>
+                        <Button size="sm" className="flex-1 bg-[#667EEA] hover:bg-[#667EEA]/90">
+                          Reservar
+                        </Button>
+                      </div>
+                    </div>
+                  </GlassCard>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

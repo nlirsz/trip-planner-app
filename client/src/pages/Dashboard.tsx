@@ -1,8 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
-import { MapPin, Globe, Calendar, FileText, Plus, List, Upload } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { MapPin, Globe, Calendar, FileText, Plus, List, Upload, Plane, DollarSign, CheckSquare, AlertTriangle, Clock, TrendingUp, Users, Sparkles } from "lucide-react";
 import { Trip } from "@shared/schema";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface DashboardProps {
   onNavigate: (section: string) => void;
@@ -39,17 +43,17 @@ export function Dashboard({ onNavigate }: DashboardProps) {
     <div className="container mx-auto px-4 py-8 pb-20 md:pb-8">
       <div className="mb-8 animate-fadeIn">
         <h2 className="text-3xl font-bold text-white mb-2">
-          Welcome back, {user?.name || "Traveler"}!
+          Bem-vindo, {user?.name || "Viajante"}!
         </h2>
-        <p className="text-white/70">Ready to plan your next adventure?</p>
+        <p className="text-white/70">Visão geral completa das suas viagens</p>
       </div>
 
-      {/* Quick Stats */}
+      {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[#1A202C]/60 text-sm">Active Trips</p>
+              <p className="text-[#1A202C]/60 text-sm">Viagens Ativas</p>
               <p className="text-2xl font-bold text-[#1A202C]">{upcomingTrips.length}</p>
             </div>
             <div className="w-12 h-12 bg-[#667EEA]/20 rounded-xl flex items-center justify-center">
@@ -61,11 +65,11 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[#1A202C]/60 text-sm">Countries Visited</p>
-              <p className="text-2xl font-bold text-[#1A202C]">{completedTrips.length}</p>
+              <p className="text-[#1A202C]/60 text-sm">Gasto Total</p>
+              <p className="text-2xl font-bold text-[#1A202C]">R$ 2.450</p>
             </div>
             <div className="w-12 h-12 bg-[#48BB78]/20 rounded-xl flex items-center justify-center">
-              <Globe className="w-6 h-6 text-[#48BB78]" />
+              <DollarSign className="w-6 h-6 text-[#48BB78]" />
             </div>
           </div>
         </GlassCard>
@@ -73,13 +77,11 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[#1A202C]/60 text-sm">Next Trip</p>
-              <p className="text-2xl font-bold text-[#1A202C]">
-                {upcomingTrips.length > 0 ? "Soon" : "None"}
-              </p>
+              <p className="text-[#1A202C]/60 text-sm">Documentos</p>
+              <p className="text-2xl font-bold text-[#1A202C]">8/12</p>
             </div>
-            <div className="w-12 h-12 bg-[#F093FB]/20 rounded-xl flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-[#F093FB]" />
+            <div className="w-12 h-12 bg-[#ED8936]/20 rounded-xl flex items-center justify-center">
+              <FileText className="w-6 h-6 text-[#ED8936]" />
             </div>
           </div>
         </GlassCard>
@@ -87,119 +89,207 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[#1A202C]/60 text-sm">Documents</p>
-              <p className="text-2xl font-bold text-[#1A202C]">0</p>
+              <p className="text-[#1A202C]/60 text-sm">Checklist</p>
+              <p className="text-2xl font-bold text-[#1A202C]">75%</p>
             </div>
-            <div className="w-12 h-12 bg-[#764BA2]/20 rounded-xl flex items-center justify-center">
-              <FileText className="w-6 h-6 text-[#764BA2]" />
+            <div className="w-12 h-12 bg-[#9F7AEA]/20 rounded-xl flex items-center justify-center">
+              <CheckSquare className="w-6 h-6 text-[#9F7AEA]" />
             </div>
           </div>
         </GlassCard>
       </div>
 
-      {/* Upcoming Trips */}
+      {/* Current Trip Status */}
       <div className="mb-8">
-        <h3 className="text-xl font-semibold text-white mb-4">Upcoming Trips</h3>
-        {upcomingTrips.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {upcomingTrips.slice(0, 3).map((trip) => (
-              <GlassCard key={trip.id} hover className="overflow-hidden">
-                <div className="aspect-video bg-gradient-to-br from-[#667EEA] to-[#764BA2] relative">
-                  <div className="absolute inset-0 bg-black/20" />
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-lg font-semibold text-white">{trip.name}</h4>
-                      <span className="text-sm text-white/70">
-                        {Math.ceil((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24))} days
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <p className="text-[#1A202C]/60 text-sm mb-4">{trip.destination}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-[#1A202C]/60">
-                      {new Date(trip.startDate).toLocaleDateString()} - {new Date(trip.endDate).toLocaleDateString()}
-                    </span>
-                    <Button
-                      size="sm"
-                      onClick={() => onNavigate("my-trips")}
-                      className="bg-[#667EEA] hover:bg-[#667EEA]/90"
-                    >
-                      Manage
-                    </Button>
-                  </div>
-                </div>
-              </GlassCard>
-            ))}
-          </div>
-        ) : (
-          <GlassCard className="p-8 text-center">
-            <p className="text-[#1A202C]/60 mb-4">No upcoming trips planned yet.</p>
-            <Button
-              onClick={() => onNavigate("create-trip")}
-              className="bg-[#667EEA] hover:bg-[#667EEA]/90"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Your First Trip
-            </Button>
-          </GlassCard>
-        )}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <h3 className="text-xl font-bold text-white mb-4">Status da Viagem Atual</h3>
         <GlassCard className="p-6">
-          <h3 className="text-lg font-semibold text-[#1A202C] mb-4">Quick Actions</h3>
-          <div className="space-y-3">
-            <Button
-              onClick={() => onNavigate("create-trip")}
-              className="w-full flex items-center justify-between p-4 bg-[#667EEA]/10 hover:bg-[#667EEA]/20 text-[#1A202C] h-auto"
-              variant="ghost"
-            >
-              <div className="flex items-center">
-                <Plus className="w-5 h-5 text-[#667EEA] mr-3" />
-                <span>Create New Trip</span>
-              </div>
-              <div className="w-5 h-5 text-[#1A202C]/60" />
-            </Button>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <h4 className="text-lg font-semibold text-[#1A202C] mb-4">Próxima Viagem</h4>
+              {upcomingTrips.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#1A202C]/60">Destino:</span>
+                    <span className="font-semibold text-[#1A202C]">{upcomingTrips[0].destination}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#1A202C]/60">Data:</span>
+                    <span className="font-semibold text-[#1A202C]">
+                      {format(new Date(upcomingTrips[0].startDate), "dd/MM/yyyy", { locale: ptBR })}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#1A202C]/60">Dias restantes:</span>
+                    <Badge variant="outline" className="bg-blue-100 text-blue-800">
+                      {Math.ceil((new Date(upcomingTrips[0].startDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} dias
+                    </Badge>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Plus className="w-12 h-12 text-[#1A202C]/40 mx-auto mb-4" />
+                  <p className="text-[#1A202C]/60 mb-4">Nenhuma viagem programada</p>
+                  <Button 
+                    className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white"
+                    onClick={() => onNavigate("my-trips")}
+                  >
+                    Criar Primeira Viagem
+                  </Button>
+                </div>
+              )}
+            </div>
             
-            <Button
-              className="w-full flex items-center justify-between p-4 bg-[#48BB78]/10 hover:bg-[#48BB78]/20 text-[#1A202C] h-auto"
-              variant="ghost"
-            >
-              <div className="flex items-center">
-                <List className="w-5 h-5 text-[#48BB78] mr-3" />
-                <span>Generate Packing List</span>
+            <div>
+              <h4 className="text-lg font-semibold text-[#1A202C] mb-4">Progresso dos Preparativos</h4>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm text-[#1A202C]/60">Documentos</span>
+                    <span className="text-sm font-medium text-[#1A202C]">8/12</span>
+                  </div>
+                  <Progress value={67} className="h-2" />
+                </div>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm text-[#1A202C]/60">Checklist de Mala</span>
+                    <span className="text-sm font-medium text-[#1A202C]">18/24</span>
+                  </div>
+                  <Progress value={75} className="h-2" />
+                </div>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm text-[#1A202C]/60">Reservas</span>
+                    <span className="text-sm font-medium text-[#1A202C]">3/5</span>
+                  </div>
+                  <Progress value={60} className="h-2" />
+                </div>
               </div>
-              <div className="w-5 h-5 text-[#1A202C]/60" />
-            </Button>
-            
-            <Button
-              onClick={() => onNavigate("documents")}
-              className="w-full flex items-center justify-between p-4 bg-[#764BA2]/10 hover:bg-[#764BA2]/20 text-[#1A202C] h-auto"
-              variant="ghost"
-            >
-              <div className="flex items-center">
-                <Upload className="w-5 h-5 text-[#764BA2] mr-3" />
-                <span>Upload Documents</span>
-              </div>
-              <div className="w-5 h-5 text-[#1A202C]/60" />
-            </Button>
+            </div>
           </div>
         </GlassCard>
-        
+      </div>
+
+      {/* Quick Actions Grid */}
+      <div className="mb-8">
+        <h3 className="text-xl font-bold text-white mb-4">Acesso Rápido</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("my-trips")}>
+            <div className="w-12 h-12 bg-[#667EEA]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <List className="w-6 h-6 text-[#667EEA]" />
+            </div>
+            <h4 className="font-semibold text-[#1A202C] text-sm">Viagens</h4>
+          </GlassCard>
+          
+          <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("flight-details")}>
+            <div className="w-12 h-12 bg-[#667EEA]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <Plane className="w-6 h-6 text-[#667EEA]" />
+            </div>
+            <h4 className="font-semibold text-[#1A202C] text-sm">Voos</h4>
+          </GlassCard>
+          
+          <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("accommodations")}>
+            <div className="w-12 h-12 bg-[#48BB78]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <MapPin className="w-6 h-6 text-[#48BB78]" />
+            </div>
+            <h4 className="font-semibold text-[#1A202C] text-sm">Hotéis</h4>
+          </GlassCard>
+          
+          <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("itinerary")}>
+            <div className="w-12 h-12 bg-[#ED8936]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <Calendar className="w-6 h-6 text-[#ED8936]" />
+            </div>
+            <h4 className="font-semibold text-[#1A202C] text-sm">Roteiro</h4>
+          </GlassCard>
+          
+          <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("packing")}>
+            <div className="w-12 h-12 bg-[#9F7AEA]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <CheckSquare className="w-6 h-6 text-[#9F7AEA]" />
+            </div>
+            <h4 className="font-semibold text-[#1A202C] text-sm">Mala</h4>
+          </GlassCard>
+          
+          <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("expenses")}>
+            <div className="w-12 h-12 bg-[#48BB78]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <DollarSign className="w-6 h-6 text-[#48BB78]" />
+            </div>
+            <h4 className="font-semibold text-[#1A202C] text-sm">Gastos</h4>
+          </GlassCard>
+          
+          <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("travel-docs")}>
+            <div className="w-12 h-12 bg-[#ED8936]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <FileText className="w-6 h-6 text-[#ED8936]" />
+            </div>
+            <h4 className="font-semibold text-[#1A202C] text-sm">Documentos</h4>
+          </GlassCard>
+          
+          <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("create-trip")}>
+            <div className="w-12 h-12 bg-[#F093FB]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <Plus className="w-6 h-6 text-[#F093FB]" />
+            </div>
+            <h4 className="font-semibold text-[#1A202C] text-sm">Nova Viagem</h4>
+          </GlassCard>
+        </div>
+      </div>
+
+      {/* Alerts and Notifications */}
+      <div className="mb-8">
+        <h3 className="text-xl font-bold text-white mb-4">Alertas Importantes</h3>
+        <div className="space-y-4">
+          <GlassCard className="p-4 border-l-4 border-yellow-400">
+            <div className="flex items-center space-x-3">
+              <AlertTriangle className="w-5 h-5 text-yellow-600" />
+              <div>
+                <h4 className="font-semibold text-[#1A202C]">Documento Vencendo</h4>
+                <p className="text-sm text-[#1A202C]/60">Seu passaporte vence em 3 meses. Considere renovar antes da viagem.</p>
+              </div>
+            </div>
+          </GlassCard>
+          
+          <GlassCard className="p-4 border-l-4 border-green-400">
+            <div className="flex items-center space-x-3">
+              <Sparkles className="w-5 h-5 text-green-600" />
+              <div>
+                <h4 className="font-semibold text-[#1A202C]">Sugestão da IA</h4>
+                <p className="text-sm text-[#1A202C]/60">Novos hotéis recomendados para São Paulo com base no seu perfil.</p>
+              </div>
+            </div>
+          </GlassCard>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="mb-8">
+        <h3 className="text-xl font-bold text-white mb-4">Atividade Recente</h3>
         <GlassCard className="p-6">
-          <h3 className="text-lg font-semibold text-[#1A202C] mb-4">AI Travel Tips</h3>
           <div className="space-y-4">
-            <div className="p-4 bg-[#F093FB]/10 rounded-xl">
-              <p className="text-[#1A202C]/80 text-sm">💡 Pack light layers for varying weather conditions!</p>
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-[#667EEA]/20 rounded-full flex items-center justify-center">
+                <Plus className="w-5 h-5 text-[#667EEA]" />
+              </div>
+              <div>
+                <p className="font-semibold text-[#1A202C]">Viagem criada</p>
+                <p className="text-sm text-[#1A202C]/60">Escapada para São Paulo • hoje</p>
+              </div>
             </div>
-            <div className="p-4 bg-[#667EEA]/10 rounded-xl">
-              <p className="text-[#1A202C]/80 text-sm">🌟 Book transportation tickets in advance to save money.</p>
+            
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-[#48BB78]/20 rounded-full flex items-center justify-center">
+                <CheckSquare className="w-5 h-5 text-[#48BB78]" />
+              </div>
+              <div>
+                <p className="font-semibold text-[#1A202C]">Checklist atualizado</p>
+                <p className="text-sm text-[#1A202C]/60">5 itens marcados como prontos • 2 horas atrás</p>
+              </div>
             </div>
-            <div className="p-4 bg-[#48BB78]/10 rounded-xl">
-              <p className="text-[#1A202C]/80 text-sm">🏖️ Don't forget to check visa requirements for your destination.</p>
+            
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-[#F093FB]/20 rounded-full flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-[#F093FB]" />
+              </div>
+              <div>
+                <p className="font-semibold text-[#1A202C]">IA gerou sugestões</p>
+                <p className="text-sm text-[#1A202C]/60">Roteiro personalizado criado • ontem</p>
+              </div>
             </div>
           </div>
         </GlassCard>
