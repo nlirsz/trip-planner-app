@@ -507,6 +507,61 @@ END:VCALENDAR`;
     }
   });
 
+  // AI trip generation endpoint
+  app.post("/api/trips/generate", async (req, res) => {
+    try {
+      const { destination, cities, startDate, endDate, budget, travelStyle, preferences, activities, avoidances } = req.body;
+      
+      const prompt = `Gere um itinerário de viagem detalhado para:
+      
+Destino: ${destination}
+Cidades: ${cities}
+Data de início: ${startDate}
+Data de fim: ${endDate}
+Orçamento: ${budget || "Não especificado"}
+Estilo de viagem: ${travelStyle?.join(", ") || "Não especificado"}
+Atividades desejadas: ${activities}
+Coisas para evitar: ${avoidances || "Nenhuma"}
+Preferências: ${preferences || "Nenhuma"}
+
+Gere um itinerário em JSON com:
+{
+  "itinerary": [
+    {
+      "day": 1,
+      "date": "2024-01-15",
+      "city": "Paris",
+      "activities": [
+        {
+          "time": "09:00",
+          "activity": "Visita à Torre Eiffel",
+          "location": "Champ de Mars, Paris",
+          "notes": "Compre ingressos com antecedência"
+        }
+      ]
+    }
+  ],
+  "packingList": {
+    "clothing": ["Casaco", "Sapatos confortáveis"],
+    "electronics": ["Carregador", "Câmera"],
+    "documents": ["Passaporte", "Seguro viagem"],
+    "health": ["Remédios", "Protetor solar"]
+  }
+}`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+
+      const generatedData = JSON.parse(response.text || "{}");
+      res.json(generatedData);
+    } catch (error) {
+      console.error("Erro na geração de viagem com IA:", error);
+      res.status(500).json({ message: "Falha na geração de viagem com IA" });
+    }
+  });
+
   // AI suggestions for accommodations
   app.post("/api/accommodations/suggestions", async (req, res) => {
     try {

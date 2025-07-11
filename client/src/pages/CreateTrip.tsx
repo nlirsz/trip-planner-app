@@ -2,21 +2,24 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { GlassCard } from "@/components/GlassCard";
+import { z } from "zod";
+import { insertTripSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { insertTripSchema } from "@shared/schema";
-import { generateTripWithAI } from "@/lib/gemini";
-import { Sparkles, Mountain, Camera, Utensils, Waves, CheckCircle, Cog } from "lucide-react";
-import { z } from "zod";
+import { apiRequest } from "@/lib/queryClient";
+import { CalendarDays, MapPin, DollarSign, Users, ArrowRight, Sparkles, Mountain, Camera, Utensils, Waves, CheckCircle, Cog, Heart } from "lucide-react";
+import { GlassCard } from "@/components/GlassCard";
 
 const createTripSchema = insertTripSchema.extend({
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
+  startDate: z.string().min(1, "Data de início é obrigatória"),
+  endDate: z.string().min(1, "Data de fim é obrigatória"),
+  cities: z.string().min(1, "Pelo menos uma cidade é obrigatória"),
+  activities: z.string().min(1, "Descreva o que deseja fazer"),
+  avoidances: z.string().optional(),
 });
 
 type CreateTripFormData = z.infer<typeof createTripSchema>;
@@ -42,9 +45,8 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
 
   const createTripMutation = useMutation({
     mutationFn: async (data: CreateTripFormData) => {
-      const response = await fetch("/api/trips", {
+      const response = await apiRequest("/api/trips", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
           startDate: new Date(data.startDate),
@@ -52,31 +54,38 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
           travelStyle: selectedStyles,
         }),
       });
-      if (!response.ok) throw new Error("Failed to create trip");
-      return response.json();
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trips"] });
       toast({
-        title: "Trip created successfully!",
-        description: "Your trip has been saved and is ready for planning.",
+        title: "Viagem criada com sucesso!",
+        description: "Sua viagem foi salva e está pronta para planejamento.",
       });
       onNavigate("my-trips");
     },
     onError: () => {
       toast({
-        title: "Error creating trip",
-        description: "Please try again.",
+        title: "Erro ao criar viagem",
+        description: "Por favor, tente novamente.",
         variant: "destructive",
       });
     },
   });
 
   const travelStyles = [
-    { id: "adventure", label: "Adventure", icon: Mountain },
-    { id: "photography", label: "Photography", icon: Camera },
-    { id: "food", label: "Food & Wine", icon: Utensils },
-    { id: "relaxation", label: "Relaxation", icon: Waves },
+    { id: "aventura", label: "Aventura", icon: Mountain },
+    { id: "fotografia", label: "Fotografia", icon: Camera },
+    { id: "gastronomia", label: "Gastronomia", icon: Utensils },
+    { id: "relaxamento", label: "Relaxamento", icon: Waves },
+    { id: "cultural", label: "Cultural", icon: CheckCircle },
+    { id: "negócios", label: "Negócios", icon: Cog },
+    { id: "família", label: "Família", icon: Users },
+    { id: "romântico", label: "Romântico", icon: Heart },
+    { id: "econômico", label: "Econômico", icon: DollarSign },
+    { id: "luxo", label: "Luxo", icon: Sparkles },
+    { id: "esportivo", label: "Esportivo", icon: Mountain },
+    { id: "wellness", label: "Wellness", icon: Waves },
   ];
 
   const toggleStyle = (styleId: string) => {
@@ -91,27 +100,38 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
     setIsGenerating(true);
     
     try {
-      // Generate AI itinerary
-      const aiData = await generateTripWithAI({
-        destination: data.destination,
-        startDate: data.startDate,
-        endDate: data.endDate,
-        budget: data.budget,
-        travelStyle: selectedStyles,
-        preferences: data.preferences,
+      // Gerar itinerário com IA
+      const response = await fetch("/api/trips/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          destination: data.destination,
+          cities: data.cities,
+          startDate: data.startDate,
+          endDate: data.endDate,
+          budget: data.budget,
+          travelStyle: selectedStyles,
+          preferences: data.preferences,
+          activities: data.activities,
+          avoidances: data.avoidances,
+        }),
       });
+      
+      if (!response.ok) {
+        throw new Error("Falha na geração com IA");
+      }
+      
+      const aiData = await response.json();
 
-      // Create trip with AI-generated data
+      // Criar viagem com dados gerados pela IA
       await createTripMutation.mutateAsync({
         ...data,
         travelStyle: selectedStyles,
       });
 
-      // Update the created trip with AI data
-      // This would be handled by updating the trip after creation
     } catch (error) {
-      console.error("AI generation failed:", error);
-      // Still create the trip without AI data
+      console.error("Falha na geração com IA:", error);
+      // Ainda criar a viagem sem dados da IA
       await createTripMutation.mutateAsync({
         ...data,
         travelStyle: selectedStyles,
@@ -123,189 +143,208 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
 
   return (
     <div className="container mx-auto px-4 py-8 pb-20 md:pb-8">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-white mb-2">Create New Trip</h2>
-        <p className="text-white/70">Let AI help you plan the perfect adventure</p>
-      </div>
-
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-2xl mx-auto">
         <GlassCard className="p-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-white mb-2">Criar Sua Viagem Perfeita</h1>
+            <p className="text-white/80">Deixe nosso assistente IA ajudar você a planejar uma jornada inesquecível</p>
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-[#1A202C] font-medium">Trip Name</Label>
+              <div>
+                <Label htmlFor="name" className="text-white">
+                  Nome da Viagem
+                </Label>
                 <Input
                   id="name"
-                  placeholder="My Amazing Adventure"
+                  placeholder="ex: Minha Aventura Incrível"
+                  className="bg-white/10 border-white/20 text-white placeholder-white/50"
                   {...register("name")}
-                  className="bg-white/50 border-white/30 focus:ring-[#667EEA] focus:border-[#667EEA]"
                 />
                 {errors.name && (
-                  <p className="text-red-500 text-sm">{errors.name.message}</p>
+                  <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>
                 )}
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="destination" className="text-[#1A202C] font-medium">Destination</Label>
+
+              <div>
+                <Label htmlFor="destination" className="text-white">
+                  Destino Principal
+                </Label>
                 <Input
                   id="destination"
-                  placeholder="e.g., Barcelona, Spain"
+                  placeholder="ex: França, Brasil, Japão"
+                  className="bg-white/10 border-white/20 text-white placeholder-white/50"
                   {...register("destination")}
-                  className="bg-white/50 border-white/30 focus:ring-[#667EEA] focus:border-[#667EEA]"
                 />
                 {errors.destination && (
-                  <p className="text-red-500 text-sm">{errors.destination.message}</p>
+                  <p className="text-red-400 text-sm mt-1">{errors.destination.message}</p>
                 )}
               </div>
             </div>
 
-            {/* Dates */}
+            <div>
+              <Label htmlFor="cities" className="text-white">
+                Cidades que deseja visitar
+              </Label>
+              <Input
+                id="cities"
+                placeholder="ex: Paris, Lyon, Nice ou São Paulo, Rio de Janeiro, Salvador"
+                className="bg-white/10 border-white/20 text-white placeholder-white/50"
+                {...register("cities")}
+              />
+              {errors.cities && (
+                <p className="text-red-400 text-sm mt-1">{errors.cities.message}</p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="startDate" className="text-[#1A202C] font-medium">Start Date</Label>
+              <div>
+                <Label htmlFor="startDate" className="text-white">
+                  Data de Início
+                </Label>
                 <Input
                   id="startDate"
                   type="date"
+                  className="bg-white/10 border-white/20 text-white"
                   {...register("startDate")}
-                  className="bg-white/50 border-white/30 focus:ring-[#667EEA] focus:border-[#667EEA]"
                 />
                 {errors.startDate && (
-                  <p className="text-red-500 text-sm">{errors.startDate.message}</p>
+                  <p className="text-red-400 text-sm mt-1">{errors.startDate.message}</p>
                 )}
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="endDate" className="text-[#1A202C] font-medium">End Date</Label>
+
+              <div>
+                <Label htmlFor="endDate" className="text-white">
+                  Data de Fim
+                </Label>
                 <Input
                   id="endDate"
                   type="date"
+                  className="bg-white/10 border-white/20 text-white"
                   {...register("endDate")}
-                  className="bg-white/50 border-white/30 focus:ring-[#667EEA] focus:border-[#667EEA]"
                 />
                 {errors.endDate && (
-                  <p className="text-red-500 text-sm">{errors.endDate.message}</p>
+                  <p className="text-red-400 text-sm mt-1">{errors.endDate.message}</p>
                 )}
               </div>
             </div>
 
-            {/* Travel Style */}
-            <div className="space-y-2">
-              <Label className="text-[#1A202C] font-medium">Travel Style</Label>
+            <div>
+              <Label htmlFor="budget" className="text-white">
+                Orçamento (R$)
+              </Label>
+              <Input
+                id="budget"
+                placeholder="ex: 5000"
+                className="bg-white/10 border-white/20 text-white placeholder-white/50"
+                {...register("budget")}
+              />
+              {errors.budget && (
+                <p className="text-red-400 text-sm mt-1">{errors.budget.message}</p>
+              )}
+            </div>
+
+            <div>
+              <Label className="text-white mb-4 block">
+                Estilo de Viagem
+              </Label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {travelStyles.map((style) => {
-                  const Icon = style.icon;
+                  const IconComponent = style.icon;
                   return (
-                    <Button
+                    <button
                       key={style.id}
                       type="button"
-                      variant="outline"
                       onClick={() => toggleStyle(style.id)}
-                      className={`p-3 h-auto flex flex-col items-center border-white/30 transition-all ${
+                      className={`p-3 rounded-lg border transition-all ${
                         selectedStyles.includes(style.id)
-                          ? "bg-[#667EEA]/20 border-[#667EEA] text-[#667EEA]"
-                          : "bg-white/30 hover:bg-[#667EEA]/20"
+                          ? "bg-white/20 border-white/40 text-white"
+                          : "bg-white/5 border-white/20 text-white/70 hover:bg-white/10"
                       }`}
                     >
-                      <Icon className="w-6 h-6 mb-2" />
+                      <IconComponent className="w-6 h-6 mx-auto mb-1" />
                       <span className="text-sm">{style.label}</span>
-                    </Button>
+                    </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Budget */}
-            <div className="space-y-2">
-              <Label htmlFor="budget" className="text-[#1A202C] font-medium">Budget Range</Label>
-              <Select onValueChange={(value) => setValue("budget", value)}>
-                <SelectTrigger className="bg-white/50 border-white/30 focus:ring-[#667EEA] focus:border-[#667EEA]">
-                  <SelectValue placeholder="Select budget range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="500-1000">$500 - $1,000</SelectItem>
-                  <SelectItem value="1000-2500">$1,000 - $2,500</SelectItem>
-                  <SelectItem value="2500-5000">$2,500 - $5,000</SelectItem>
-                  <SelectItem value="5000+">$5,000+</SelectItem>
-                </SelectContent>
-              </Select>
+            <div>
+              <Label htmlFor="activities" className="text-white">
+                O que você quer fazer?
+              </Label>
+              <Textarea
+                id="activities"
+                placeholder="Descreva as atividades que deseja fazer: museus, restaurantes, vida noturna, esportes, compras, etc."
+                className="bg-white/10 border-white/20 text-white placeholder-white/50 min-h-[100px]"
+                {...register("activities")}
+              />
+              {errors.activities && (
+                <p className="text-red-400 text-sm mt-1">{errors.activities.message}</p>
+              )}
             </div>
 
-            {/* Additional Preferences */}
-            <div className="space-y-2">
-              <Label htmlFor="preferences" className="text-[#1A202C] font-medium">Additional Preferences</Label>
+            <div>
+              <Label htmlFor="avoidances" className="text-white">
+                O que você quer evitar? (opcional)
+              </Label>
+              <Textarea
+                id="avoidances"
+                placeholder="Coisas que prefere evitar: multidões, lugares muito turísticos, comida picante, etc."
+                className="bg-white/10 border-white/20 text-white placeholder-white/50 min-h-[80px]"
+                {...register("avoidances")}
+              />
+              {errors.avoidances && (
+                <p className="text-red-400 text-sm mt-1">{errors.avoidances.message}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="preferences" className="text-white">
+                Preferências e Observações
+              </Label>
               <Textarea
                 id="preferences"
-                rows={4}
-                placeholder="Tell us about your interests, dietary restrictions, accessibility needs, or any special requests..."
+                placeholder="Conte-nos sobre suas preferências de viagem, restrições alimentares, necessidades de acessibilidade, etc."
+                className="bg-white/10 border-white/20 text-white placeholder-white/50 min-h-[100px]"
                 {...register("preferences")}
-                className="bg-white/50 border-white/30 focus:ring-[#667EEA] focus:border-[#667EEA] resize-none"
               />
+              {errors.preferences && (
+                <p className="text-red-400 text-sm mt-1">{errors.preferences.message}</p>
+              )}
             </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-end space-x-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 type="button"
                 variant="outline"
-                className="border-white/30 bg-white/30 hover:bg-white/40"
+                onClick={() => onNavigate("dashboard")}
+                className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20"
               >
-                Save Draft
+                Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={isGenerating}
-                className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white flex items-center"
+                className="flex-1 bg-gradient-to-r from-gray-800 to-gray-900 text-white hover:from-gray-700 hover:to-gray-800"
               >
                 {isGenerating ? (
                   <>
-                    <Cog className="w-4 h-4 mr-2 animate-spin" />
-                    Generating with AI...
+                    <Sparkles className="mr-2 h-4 w-4 animate-spin" />
+                    Gerando com IA...
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Generate Trip with AI
+                    <ArrowRight className="mr-2 h-4 w-4" />
+                    Criar Viagem
                   </>
                 )}
               </Button>
             </div>
           </form>
         </GlassCard>
-
-        {/* AI Generation Preview */}
-        {isGenerating && (
-          <GlassCard className="mt-8 p-8">
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-[#667EEA]/20 rounded-full mb-4">
-                <Sparkles className="w-8 h-8 text-[#667EEA]" />
-              </div>
-              <h3 className="text-xl font-semibold text-[#1A202C] mb-2">AI is Creating Your Perfect Trip</h3>
-              <p className="text-[#1A202C]/60">Analyzing your preferences and generating personalized recommendations...</p>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex items-center p-4 bg-white/30 rounded-xl">
-                <div className="w-8 h-8 bg-[#48BB78]/20 rounded-full flex items-center justify-center mr-4">
-                  <CheckCircle className="w-5 h-5 text-[#48BB78]" />
-                </div>
-                <span className="text-[#1A202C]">Analyzing destination and weather</span>
-              </div>
-              <div className="flex items-center p-4 bg-white/30 rounded-xl">
-                <div className="w-8 h-8 bg-[#667EEA]/20 rounded-full flex items-center justify-center mr-4">
-                  <Cog className="w-5 h-5 text-[#667EEA] animate-spin" />
-                </div>
-                <span className="text-[#1A202C]">Generating custom itinerary</span>
-              </div>
-              <div className="flex items-center p-4 bg-white/30 rounded-xl opacity-50">
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-4">
-                  <Cog className="w-5 h-5 text-gray-500" />
-                </div>
-                <span className="text-[#1A202C]">Creating packing list</span>
-              </div>
-            </div>
-          </GlassCard>
-        )}
       </div>
     </div>
   );

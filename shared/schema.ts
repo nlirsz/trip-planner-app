@@ -123,6 +123,10 @@ export const insertTripSchema = createInsertSchema(trips).pick({
   budget: true,
   travelStyle: true,
   preferences: true,
+}).extend({
+  cities: z.string().optional(),
+  activities: z.string().optional(),
+  avoidances: z.string().optional(),
 });
 
 export const insertDocumentSchema = createInsertSchema(documents).pick({
