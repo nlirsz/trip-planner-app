@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { z } from "zod";
 import { 
   insertUserSchema, 
   insertTripSchema, 
@@ -74,14 +75,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/trips", async (req, res) => {
     try {
+      console.log("Request body:", req.body);
       const validatedData = insertTripSchema.parse(req.body);
+      console.log("Validated data:", validatedData);
       const trip = await storage.createTrip({
         ...validatedData,
         userId: CURRENT_USER_ID
       });
       res.json(trip);
     } catch (error) {
-      res.status(400).json({ message: "Invalid trip data" });
+      console.error("Trip creation error:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid trip data", errors: error.errors });
+      } else {
+        res.status(400).json({ message: "Invalid trip data" });
+      }
     }
   });
 
