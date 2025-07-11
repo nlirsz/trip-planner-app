@@ -145,9 +145,10 @@ export const insertFlightSchema = createInsertSchema(flights).pick({
   departureTime: true,
   arrivalTime: true,
   type: true,
-  confirmationCode: true,
-  gate: true,
-  seat: true,
+}).extend({
+  confirmationCode: z.string().optional(),
+  gate: z.string().optional(),
+  seat: z.string().optional(),
 });
 
 export const insertAccommodationSchema = createInsertSchema(accommodations).pick({
@@ -157,13 +158,14 @@ export const insertAccommodationSchema = createInsertSchema(accommodations).pick
   city: true,
   checkIn: true,
   checkOut: true,
-  checkInTime: true,
-  checkOutTime: true,
-  price: true,
   type: true,
-  confirmationCode: true,
-  contactInfo: true,
-  amenities: true,
+}).extend({
+  checkInTime: z.string().optional(),
+  checkOutTime: z.string().optional(),
+  price: z.string().optional(),
+  confirmationCode: z.string().optional(),
+  contactInfo: z.string().optional(),
+  amenities: z.array(z.string()).optional(),
 });
 
 export const insertItineraryItemSchema = createInsertSchema(itineraryItems).pick({
@@ -172,11 +174,12 @@ export const insertItineraryItemSchema = createInsertSchema(itineraryItems).pick
   city: true,
   time: true,
   activity: true,
-  location: true,
-  notes: true,
-  category: true,
-  duration: true,
-  estimatedCost: true,
+}).extend({
+  location: z.string().optional(),
+  notes: z.string().optional(),
+  category: z.string().optional(),
+  duration: z.string().optional(),
+  estimatedCost: z.string().optional(),
 });
 
 export const insertExpenseSchema = createInsertSchema(expenses).pick({
@@ -185,9 +188,10 @@ export const insertExpenseSchema = createInsertSchema(expenses).pick({
   currency: true,
   description: true,
   category: true,
-  city: true,
   date: true,
-  wiseTransactionId: true,
+}).extend({
+  city: z.string().optional(),
+  wiseTransactionId: z.string().optional(),
 });
 
 export const insertTravelDocumentSchema = createInsertSchema(travelDocuments).pick({

@@ -338,11 +338,18 @@ END:VCALENDAR`;
 
   app.post("/api/flights", async (req, res) => {
     try {
+      console.log("Flight request body:", req.body);
       const validatedData = insertFlightSchema.parse(req.body);
+      console.log("Flight validated data:", validatedData);
       const flight = await storage.createFlight(validatedData);
       res.json(flight);
     } catch (error) {
-      res.status(400).json({ message: "Invalid flight data" });
+      console.error("Flight validation error:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid flight data", errors: error.errors });
+      } else {
+        res.status(400).json({ message: "Invalid flight data" });
+      }
     }
   });
 
