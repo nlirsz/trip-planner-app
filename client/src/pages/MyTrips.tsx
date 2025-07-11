@@ -53,20 +53,20 @@ export function MyTrips({ onNavigate, onTripSelect }: MyTripsProps) {
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-3xl font-bold text-white mb-2">My Trips</h2>
-            <p className="text-white/70">Manage and track all your adventures</p>
+            <h2 className="text-3xl font-bold text-white mb-2">Minhas Viagens</h2>
+            <p className="text-white/90">Gerencie e acompanhe todas as suas aventuras</p>
           </div>
           <div className="mt-4 md:mt-0 flex space-x-4">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="bg-white/20 border-white/30 text-white focus:ring-[#667EEA]">
+              <SelectTrigger className="bg-black/30 border-white/20 text-white focus:ring-[#667EEA]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Trips</SelectItem>
-                <SelectItem value="planning">Planning</SelectItem>
-                <SelectItem value="upcoming">Upcoming</SelectItem>
-                <SelectItem value="in-progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="all">Todas as Viagens</SelectItem>
+                <SelectItem value="planning">Planejando</SelectItem>
+                <SelectItem value="upcoming">Próximas</SelectItem>
+                <SelectItem value="in-progress">Em Andamento</SelectItem>
+                <SelectItem value="completed">Concluídas</SelectItem>
               </SelectContent>
             </Select>
             <Button
@@ -74,7 +74,7 @@ export function MyTrips({ onNavigate, onTripSelect }: MyTripsProps) {
               className="bg-[#667EEA] hover:bg-[#667EEA]/90"
             >
               <Plus className="w-4 h-4 mr-2" />
-              New Trip
+              Nova Viagem
             </Button>
           </div>
         </div>
@@ -96,13 +96,13 @@ export function MyTrips({ onNavigate, onTripSelect }: MyTripsProps) {
           <div className="w-16 h-16 bg-[#667EEA]/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <Plus className="w-8 h-8 text-[#667EEA]" />
           </div>
-          <h3 className="text-xl font-semibold text-[#1A202C] mb-2">
-            {statusFilter === "all" ? "No trips yet" : `No ${statusFilter} trips`}
+          <h3 className="text-xl font-semibold text-white mb-2">
+            {statusFilter === "all" ? "Nenhuma viagem ainda" : `Nenhuma viagem ${statusFilter}`}
           </h3>
-          <p className="text-[#1A202C]/60 mb-6">
+          <p className="text-white/80 mb-6">
             {statusFilter === "all" 
-              ? "Start planning your first adventure with our AI-powered trip planner!"
-              : `You don't have any ${statusFilter} trips at the moment.`
+              ? "Comece a planejar sua primeira aventura com nosso planejador de viagens alimentado por IA!"
+              : `Você não tem nenhuma viagem ${statusFilter} no momento.`
             }
           </p>
           <Button
@@ -110,7 +110,7 @@ export function MyTrips({ onNavigate, onTripSelect }: MyTripsProps) {
             className="bg-[#667EEA] hover:bg-[#667EEA]/90"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Create Your First Trip
+            Crie Sua Primeira Viagem
           </Button>
         </GlassCard>
       )}

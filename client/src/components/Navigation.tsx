@@ -30,7 +30,7 @@ export function Navigation({ onSectionChange, currentSection }: NavigationProps)
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-white/30 rounded-lg flex items-center justify-center">
-                <img src="/attached_assets/logo miller_1752268064387.png" alt="Miller" className="w-5 h-5" />
+                <img src="/attached_assets/logo miller_1752271542982.png" alt="Miller" className="w-5 h-5" />
               </div>
               <h1 className="text-xl font-bold text-white">Miller</h1>
             </div>

@@ -43,17 +43,17 @@ export function TripCard({ trip, onViewDetails, onEdit }: TripCardProps) {
       </div>
       
       <div className="p-6">
-        <div className="flex items-center text-[#1A202C]/60 mb-4">
+        <div className="flex items-center text-white/90 mb-4">
           <MapPin className="w-4 h-4 mr-2" />
           <span className="text-sm">{trip.destination}</span>
         </div>
         
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center text-[#1A202C]/60 text-sm">
+          <div className="flex items-center text-white/90 text-sm">
             <Calendar className="w-4 h-4 mr-2" />
             <span>{format(startDate, "MMM d")} - {format(endDate, "MMM d, yyyy")}</span>
           </div>
-          <div className="flex items-center text-[#1A202C]/60 text-sm">
+          <div className="flex items-center text-white/90 text-sm">
             <Clock className="w-4 h-4 mr-2" />
             <span>{duration} days</span>
           </div>
@@ -62,8 +62,8 @@ export function TripCard({ trip, onViewDetails, onEdit }: TripCardProps) {
         {trip.status !== "completed" && (
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[#1A202C]/60 text-sm">Planning Progress</span>
-              <span className="text-[#1A202C]/60 text-sm">75%</span>
+              <span className="text-white/90 text-sm">Planning Progress</span>
+              <span className="text-white/90 text-sm">75%</span>
             </div>
             <div className="w-full bg-white/30 rounded-full h-2">
               <div className="bg-[#667EEA] h-2 rounded-full" style={{ width: "75%" }} />

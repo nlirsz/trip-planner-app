@@ -45,7 +45,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <h2 className="text-3xl font-bold text-white mb-2">
           Bem-vindo, {user?.name || "Viajante"}!
         </h2>
-        <p className="text-white/70">Visão geral completa das suas viagens</p>
+        <p className="text-white/90">Visão geral completa das suas viagens</p>
       </div>
 
       {/* Overview Stats */}
@@ -53,7 +53,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white/80 text-sm font-medium">Viagens Ativas</p>
+              <p className="text-white/90 text-sm font-medium">Viagens Ativas</p>
               <p className="text-2xl font-bold text-white">{upcomingTrips.length}</p>
             </div>
             <div className="w-12 h-12 bg-[#667EEA]/30 rounded-xl flex items-center justify-center">
@@ -65,7 +65,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white/80 text-sm font-medium">Gasto Total</p>
+              <p className="text-white/90 text-sm font-medium">Gasto Total</p>
               <p className="text-2xl font-bold text-white">R$ 2.450</p>
             </div>
             <div className="w-12 h-12 bg-[#48BB78]/30 rounded-xl flex items-center justify-center">
@@ -77,7 +77,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white/80 text-sm font-medium">Documentos</p>
+              <p className="text-white/90 text-sm font-medium">Documentos</p>
               <p className="text-2xl font-bold text-white">8/12</p>
             </div>
             <div className="w-12 h-12 bg-[#ED8936]/30 rounded-xl flex items-center justify-center">
@@ -89,7 +89,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
         <GlassCard hover className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white/80 text-sm font-medium">Checklist</p>
+              <p className="text-white/90 text-sm font-medium">Checklist</p>
               <p className="text-2xl font-bold text-white">75%</p>
             </div>
             <div className="w-12 h-12 bg-[#9F7AEA]/30 rounded-xl flex items-center justify-center">
@@ -109,17 +109,17 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               {upcomingTrips.length > 0 ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-white/80 font-medium">Destino:</span>
+                    <span className="text-white/90 font-medium">Destino:</span>
                     <span className="font-semibold text-white">{upcomingTrips[0].destination}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-white/80 font-medium">Data:</span>
+                    <span className="text-white/90 font-medium">Data:</span>
                     <span className="font-semibold text-white">
                       {format(new Date(upcomingTrips[0].startDate), "dd/MM/yyyy", { locale: ptBR })}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-white/80 font-medium">Dias restantes:</span>
+                    <span className="text-white/90 font-medium">Dias restantes:</span>
                     <Badge variant="outline" className="bg-blue-100 text-blue-800">
                       {Math.ceil((new Date(upcomingTrips[0].startDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} dias
                     </Badge>
@@ -128,7 +128,7 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               ) : (
                 <div className="text-center py-8">
                   <Plus className="w-12 h-12 text-white/60 mx-auto mb-4" />
-                  <p className="text-white/80 mb-4">Nenhuma viagem programada</p>
+                  <p className="text-white/90 mb-4">Nenhuma viagem programada</p>
                   <Button 
                     className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white"
                     onClick={() => onNavigate("my-trips")}
@@ -144,21 +144,21 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span className="text-sm text-white/80 font-medium">Documentos</span>
+                    <span className="text-sm text-white/90 font-medium">Documentos</span>
                     <span className="text-sm font-medium text-white">8/12</span>
                   </div>
                   <Progress value={67} className="h-2" />
                 </div>
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span className="text-sm text-white/80 font-medium">Checklist de Mala</span>
+                    <span className="text-sm text-white/90 font-medium">Checklist de Mala</span>
                     <span className="text-sm font-medium text-white">18/24</span>
                   </div>
                   <Progress value={75} className="h-2" />
                 </div>
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span className="text-sm text-white/80 font-medium">Reservas</span>
+                    <span className="text-sm text-white/90 font-medium">Reservas</span>
                     <span className="text-sm font-medium text-white">3/5</span>
                   </div>
                   <Progress value={60} className="h-2" />
