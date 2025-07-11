@@ -1,8 +1,8 @@
-# TravelAI - AI-Powered Travel Planning Assistant
+# Miller - AI-Powered Travel Planning Assistant
 
 ## Overview
 
-TravelAI is a modern web application that helps users plan and organize their trips with AI assistance. The app features a glassmorphism UI design and provides comprehensive travel planning tools including itinerary generation, document management, and travel organization.
+Miller is a modern web application that helps users plan and organize their trips with AI assistance. The app features a glassmorphism UI design with enhanced dark contrast and provides comprehensive travel planning tools including itinerary generation, document management, and travel organization.
 
 ## User Preferences
 
@@ -104,4 +104,29 @@ The application uses a PostgreSQL database with three main tables:
 - **Phase 3**: Multi-city trip planning, offline functionality with Service Workers
 - **Phase 4**: Third-party API integrations (Wise, Google Maps, weather services)
 
-The application follows a modern full-stack architecture with strong TypeScript typing throughout, AI-powered content generation, and a focus on user experience through glassmorphism design and responsive interfaces.
+## Recent Changes (July 2025)
+
+### UI/UX Improvements
+- **Brand Update**: Changed application name from TravelAI to Miller
+- **Logo Integration**: Added Miller logo to navigation header
+- **Enhanced Contrast**: Improved visual contrast for better readability
+  - GlassCard components now use `bg-black/40` instead of `bg-white/25`
+  - Form inputs use `bg-black/30` for better visibility
+  - Travel style buttons use darker backgrounds for consistency
+  - Hover effects enhanced with darker black backgrounds
+
+### Technical Fixes
+- **Schema Validation**: Fixed trip creation validation errors
+  - Changed trip dates from timestamp to text fields in database schema
+  - Updated validation to handle string dates properly
+  - Added comprehensive error logging for debugging
+- **API Request Function**: Corrected parameter order in apiRequest function
+- **Trip Generation**: Tested and verified AI-powered trip generation (30-60 second response time)
+
+### Testing Status
+- ✅ Trip creation via API: Working correctly
+- ✅ Form validation: Proper error handling
+- ✅ AI generation: Functional with Gemini integration
+- ✅ UI contrast: Significantly improved readability
+
+The application follows a modern full-stack architecture with strong TypeScript typing throughout, AI-powered content generation, and a focus on user experience through glassmorphism design with enhanced dark contrast for better accessibility.

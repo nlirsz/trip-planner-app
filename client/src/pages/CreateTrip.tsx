@@ -159,7 +159,7 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
                 <Input
                   id="name"
                   placeholder="ex: Minha Aventura Incrível"
-                  className="bg-white/20 border-white/30 text-white placeholder-white/60 font-medium"
+                  className="bg-black/30 border-white/20 text-white placeholder-white/60 font-medium"
                   {...register("name")}
                 />
                 {errors.name && (
@@ -174,7 +174,7 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
                 <Input
                   id="destination"
                   placeholder="ex: França, Brasil, Japão"
-                  className="bg-white/20 border-white/30 text-white placeholder-white/60 font-medium"
+                  className="bg-black/30 border-white/20 text-white placeholder-white/60 font-medium"
                   {...register("destination")}
                 />
                 {errors.destination && (
@@ -190,7 +190,7 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
               <Input
                 id="cities"
                 placeholder="ex: Paris, Lyon, Nice ou São Paulo, Rio de Janeiro, Salvador"
-                className="bg-white/20 border-white/30 text-white placeholder-white/60 font-medium"
+                className="bg-black/30 border-white/20 text-white placeholder-white/60 font-medium"
                 {...register("cities")}
               />
               {errors.cities && (
@@ -206,7 +206,7 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
                 <Input
                   id="startDate"
                   type="date"
-                  className="bg-white/20 border-white/30 text-white font-medium"
+                  className="bg-black/30 border-white/20 text-white font-medium"
                   {...register("startDate")}
                 />
                 {errors.startDate && (
@@ -221,7 +221,7 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
                 <Input
                   id="endDate"
                   type="date"
-                  className="bg-white/20 border-white/30 text-white font-medium"
+                  className="bg-black/30 border-white/20 text-white font-medium"
                   {...register("endDate")}
                 />
                 {errors.endDate && (
@@ -237,7 +237,7 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
               <Input
                 id="budget"
                 placeholder="ex: 5000"
-                className="bg-white/20 border-white/30 text-white placeholder-white/60 font-medium"
+                className="bg-black/30 border-white/20 text-white placeholder-white/60 font-medium"
                 {...register("budget")}
               />
               {errors.budget && (
@@ -259,8 +259,8 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
                       onClick={() => toggleStyle(style.id)}
                       className={`p-3 rounded-lg border transition-all ${
                         selectedStyles.includes(style.id)
-                          ? "bg-white/30 border-white/50 text-white shadow-lg"
-                          : "bg-white/15 border-white/25 text-white/80 hover:bg-white/20 hover:text-white"
+                          ? "bg-black/50 border-white/50 text-white shadow-lg"
+                          : "bg-black/25 border-white/25 text-white/80 hover:bg-black/40 hover:text-white"
                       }`}
                     >
                       <IconComponent className="w-6 h-6 mx-auto mb-1" />
@@ -278,7 +278,7 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
               <Textarea
                 id="activities"
                 placeholder="Descreva as atividades que deseja fazer: museus, restaurantes, vida noturna, esportes, compras, etc."
-                className="bg-white/20 border-white/30 text-white placeholder-white/60 min-h-[100px] font-medium"
+                className="bg-black/30 border-white/20 text-white placeholder-white/60 min-h-[100px] font-medium"
                 {...register("activities")}
               />
               {errors.activities && (
@@ -293,7 +293,7 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
               <Textarea
                 id="avoidances"
                 placeholder="Coisas que prefere evitar: multidões, lugares muito turísticos, comida picante, etc."
-                className="bg-white/20 border-white/30 text-white placeholder-white/60 min-h-[80px] font-medium"
+                className="bg-black/30 border-white/20 text-white placeholder-white/60 min-h-[80px] font-medium"
                 {...register("avoidances")}
               />
               {errors.avoidances && (
@@ -308,7 +308,7 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
               <Textarea
                 id="preferences"
                 placeholder="Conte-nos sobre suas preferências de viagem, restrições alimentares, necessidades de acessibilidade, etc."
-                className="bg-white/20 border-white/30 text-white placeholder-white/60 min-h-[100px] font-medium"
+                className="bg-black/30 border-white/20 text-white placeholder-white/60 min-h-[100px] font-medium"
                 {...register("preferences")}
               />
               {errors.preferences && (
@@ -321,7 +321,7 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
                 type="button"
                 variant="outline"
                 onClick={() => onNavigate("dashboard")}
-                className="flex-1 bg-white/20 border-white/30 text-white hover:bg-white/30 font-medium"
+                className="flex-1 bg-black/30 border-white/20 text-white hover:bg-black/40 font-medium"
               >
                 Cancelar
               </Button>
