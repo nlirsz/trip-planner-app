@@ -153,100 +153,100 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="name" className="text-white">
+                <Label htmlFor="name" className="text-white font-semibold">
                   Nome da Viagem
                 </Label>
                 <Input
                   id="name"
                   placeholder="ex: Minha Aventura Incrível"
-                  className="bg-white/10 border-white/20 text-white placeholder-white/50"
+                  className="bg-white/20 border-white/30 text-white placeholder-white/60 font-medium"
                   {...register("name")}
                 />
                 {errors.name && (
-                  <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>
+                  <p className="text-red-300 text-sm mt-1 font-medium">{errors.name.message}</p>
                 )}
               </div>
 
               <div>
-                <Label htmlFor="destination" className="text-white">
+                <Label htmlFor="destination" className="text-white font-semibold">
                   Destino Principal
                 </Label>
                 <Input
                   id="destination"
                   placeholder="ex: França, Brasil, Japão"
-                  className="bg-white/10 border-white/20 text-white placeholder-white/50"
+                  className="bg-white/20 border-white/30 text-white placeholder-white/60 font-medium"
                   {...register("destination")}
                 />
                 {errors.destination && (
-                  <p className="text-red-400 text-sm mt-1">{errors.destination.message}</p>
+                  <p className="text-red-300 text-sm mt-1 font-medium">{errors.destination.message}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <Label htmlFor="cities" className="text-white">
+              <Label htmlFor="cities" className="text-white font-semibold">
                 Cidades que deseja visitar
               </Label>
               <Input
                 id="cities"
                 placeholder="ex: Paris, Lyon, Nice ou São Paulo, Rio de Janeiro, Salvador"
-                className="bg-white/10 border-white/20 text-white placeholder-white/50"
+                className="bg-white/20 border-white/30 text-white placeholder-white/60 font-medium"
                 {...register("cities")}
               />
               {errors.cities && (
-                <p className="text-red-400 text-sm mt-1">{errors.cities.message}</p>
+                <p className="text-red-300 text-sm mt-1 font-medium">{errors.cities.message}</p>
               )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="startDate" className="text-white">
+                <Label htmlFor="startDate" className="text-white font-semibold">
                   Data de Início
                 </Label>
                 <Input
                   id="startDate"
                   type="date"
-                  className="bg-white/10 border-white/20 text-white"
+                  className="bg-white/20 border-white/30 text-white font-medium"
                   {...register("startDate")}
                 />
                 {errors.startDate && (
-                  <p className="text-red-400 text-sm mt-1">{errors.startDate.message}</p>
+                  <p className="text-red-300 text-sm mt-1 font-medium">{errors.startDate.message}</p>
                 )}
               </div>
 
               <div>
-                <Label htmlFor="endDate" className="text-white">
+                <Label htmlFor="endDate" className="text-white font-semibold">
                   Data de Fim
                 </Label>
                 <Input
                   id="endDate"
                   type="date"
-                  className="bg-white/10 border-white/20 text-white"
+                  className="bg-white/20 border-white/30 text-white font-medium"
                   {...register("endDate")}
                 />
                 {errors.endDate && (
-                  <p className="text-red-400 text-sm mt-1">{errors.endDate.message}</p>
+                  <p className="text-red-300 text-sm mt-1 font-medium">{errors.endDate.message}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <Label htmlFor="budget" className="text-white">
+              <Label htmlFor="budget" className="text-white font-semibold">
                 Orçamento (R$)
               </Label>
               <Input
                 id="budget"
                 placeholder="ex: 5000"
-                className="bg-white/10 border-white/20 text-white placeholder-white/50"
+                className="bg-white/20 border-white/30 text-white placeholder-white/60 font-medium"
                 {...register("budget")}
               />
               {errors.budget && (
-                <p className="text-red-400 text-sm mt-1">{errors.budget.message}</p>
+                <p className="text-red-300 text-sm mt-1 font-medium">{errors.budget.message}</p>
               )}
             </div>
 
             <div>
-              <Label className="text-white mb-4 block">
+              <Label className="text-white font-semibold mb-4 block">
                 Estilo de Viagem
               </Label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -259,12 +259,12 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
                       onClick={() => toggleStyle(style.id)}
                       className={`p-3 rounded-lg border transition-all ${
                         selectedStyles.includes(style.id)
-                          ? "bg-white/20 border-white/40 text-white"
-                          : "bg-white/5 border-white/20 text-white/70 hover:bg-white/10"
+                          ? "bg-white/30 border-white/50 text-white shadow-lg"
+                          : "bg-white/15 border-white/25 text-white/80 hover:bg-white/20 hover:text-white"
                       }`}
                     >
                       <IconComponent className="w-6 h-6 mx-auto mb-1" />
-                      <span className="text-sm">{style.label}</span>
+                      <span className="text-sm font-medium">{style.label}</span>
                     </button>
                   );
                 })}
@@ -272,47 +272,47 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
             </div>
 
             <div>
-              <Label htmlFor="activities" className="text-white">
+              <Label htmlFor="activities" className="text-white font-semibold">
                 O que você quer fazer?
               </Label>
               <Textarea
                 id="activities"
                 placeholder="Descreva as atividades que deseja fazer: museus, restaurantes, vida noturna, esportes, compras, etc."
-                className="bg-white/10 border-white/20 text-white placeholder-white/50 min-h-[100px]"
+                className="bg-white/20 border-white/30 text-white placeholder-white/60 min-h-[100px] font-medium"
                 {...register("activities")}
               />
               {errors.activities && (
-                <p className="text-red-400 text-sm mt-1">{errors.activities.message}</p>
+                <p className="text-red-300 text-sm mt-1 font-medium">{errors.activities.message}</p>
               )}
             </div>
 
             <div>
-              <Label htmlFor="avoidances" className="text-white">
+              <Label htmlFor="avoidances" className="text-white font-semibold">
                 O que você quer evitar? (opcional)
               </Label>
               <Textarea
                 id="avoidances"
                 placeholder="Coisas que prefere evitar: multidões, lugares muito turísticos, comida picante, etc."
-                className="bg-white/10 border-white/20 text-white placeholder-white/50 min-h-[80px]"
+                className="bg-white/20 border-white/30 text-white placeholder-white/60 min-h-[80px] font-medium"
                 {...register("avoidances")}
               />
               {errors.avoidances && (
-                <p className="text-red-400 text-sm mt-1">{errors.avoidances.message}</p>
+                <p className="text-red-300 text-sm mt-1 font-medium">{errors.avoidances.message}</p>
               )}
             </div>
 
             <div>
-              <Label htmlFor="preferences" className="text-white">
+              <Label htmlFor="preferences" className="text-white font-semibold">
                 Preferências e Observações
               </Label>
               <Textarea
                 id="preferences"
                 placeholder="Conte-nos sobre suas preferências de viagem, restrições alimentares, necessidades de acessibilidade, etc."
-                className="bg-white/10 border-white/20 text-white placeholder-white/50 min-h-[100px]"
+                className="bg-white/20 border-white/30 text-white placeholder-white/60 min-h-[100px] font-medium"
                 {...register("preferences")}
               />
               {errors.preferences && (
-                <p className="text-red-400 text-sm mt-1">{errors.preferences.message}</p>
+                <p className="text-red-300 text-sm mt-1 font-medium">{errors.preferences.message}</p>
               )}
             </div>
 
@@ -321,7 +321,7 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
                 type="button"
                 variant="outline"
                 onClick={() => onNavigate("dashboard")}
-                className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                className="flex-1 bg-white/20 border-white/30 text-white hover:bg-white/30 font-medium"
               >
                 Cancelar
               </Button>
