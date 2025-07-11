@@ -30,11 +30,15 @@ export function Navigation({ onSectionChange, currentSection }: NavigationProps)
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-white/30 rounded-lg flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-white">
-                  <rect x="4" y="4" width="6" height="16" fill="currentColor" />
-                  <rect x="14" y="4" width="6" height="16" fill="currentColor" />
-                  <rect x="4" y="12" width="16" height="4" fill="currentColor" />
-                </svg>
+                <img 
+                  src="/logo-miller.png" 
+                  alt="Miller" 
+                  className="w-6 h-6 object-contain filter invert"
+                  onError={(e) => {
+                    console.error('Logo failed to load:', e);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
               </div>
               <h1 className="text-xl font-bold text-white">Miller</h1>
             </div>
