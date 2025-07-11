@@ -29,7 +29,8 @@ export function MyTrips({ onNavigate, onTripSelect }: MyTripsProps) {
   };
 
   const handleEdit = (trip: Trip) => {
-    // Navigate to edit mode - this would open the CreateTrip form with pre-filled data
+    // Store the trip data for editing and navigate to edit mode
+    localStorage.setItem('editingTrip', JSON.stringify(trip));
     onNavigate("create-trip");
   };
 

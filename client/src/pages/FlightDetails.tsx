@@ -84,8 +84,8 @@ export function FlightDetails({ onNavigate }: FlightDetailsProps) {
               <div className="lg:col-span-2">
                 <GlassCard className="p-8 text-center">
                   <Plane className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-[#1A202C] mb-2">Nenhum voo adicionado</h3>
-                  <p className="text-gray-600 mb-4">Adicione seus voos para ver informações detalhadas do aeroporto</p>
+                  <h3 className="text-xl font-semibold text-white mb-2">Nenhum voo adicionado</h3>
+                  <p className="text-white/80 mb-4">Adicione seus voos para ver informações detalhadas do aeroporto</p>
                   <Button className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white">
                     <Plus className="w-4 h-4 mr-2" />
                     Adicionar Primeiro Voo
@@ -99,18 +99,18 @@ export function FlightDetails({ onNavigate }: FlightDetailsProps) {
                     <Badge variant={flight.type === "outbound" ? "default" : "secondary"}>
                       {flight.type === "outbound" ? "IDA" : "VOLTA"}
                     </Badge>
-                    <span className="text-sm text-gray-600">{flight.airline}</span>
+                    <span className="text-sm text-white/70">{flight.airline}</span>
                   </div>
 
                   <div className="space-y-4">
                     {/* Flight Route */}
                     <div className="flex items-center justify-between">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-[#1A202C]">{flight.departureAirport}</div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-2xl font-bold text-white">{flight.departureAirport}</div>
+                        <div className="text-sm text-white/70">
                           {format(new Date(flight.departureTime), "HH:mm", { locale: ptBR })}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-white/60">
                           {format(new Date(flight.departureTime), "dd/MM", { locale: ptBR })}
                         </div>
                       </div>
@@ -126,11 +126,11 @@ export function FlightDetails({ onNavigate }: FlightDetailsProps) {
                       </div>
 
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-[#1A202C]">{flight.arrivalAirport}</div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-2xl font-bold text-white">{flight.arrivalAirport}</div>
+                        <div className="text-sm text-white/70">
                           {format(new Date(flight.arrivalTime), "HH:mm", { locale: ptBR })}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-white/60">
                           {format(new Date(flight.arrivalTime), "dd/MM", { locale: ptBR })}
                         </div>
                       </div>
@@ -141,34 +141,34 @@ export function FlightDetails({ onNavigate }: FlightDetailsProps) {
                     {/* Flight Details */}
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-600">Voo:</span>
-                        <span className="ml-2 font-semibold">{flight.flightNumber}</span>
+                        <span className="text-white/70">Voo:</span>
+                        <span className="ml-2 font-semibold text-white">{flight.flightNumber}</span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Assento:</span>
-                        <span className="ml-2 font-semibold">{flight.seat || "Não definido"}</span>
+                        <span className="text-white/70">Assento:</span>
+                        <span className="ml-2 font-semibold text-white">{flight.seat || "Não definido"}</span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Portão:</span>
-                        <span className="ml-2 font-semibold">{flight.gate || "A definir"}</span>
+                        <span className="text-white/70">Portão:</span>
+                        <span className="ml-2 font-semibold text-white">{flight.gate || "A definir"}</span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Código:</span>
-                        <span className="ml-2 font-semibold">{flight.confirmationCode || "N/A"}</span>
+                        <span className="text-white/70">Código:</span>
+                        <span className="ml-2 font-semibold text-white">{flight.confirmationCode || "N/A"}</span>
                       </div>
                     </div>
 
                     {/* Airport Information */}
                     <div className="mt-4">
-                      <h4 className="font-semibold text-[#1A202C] mb-2">Informações do Aeroporto</h4>
+                      <h4 className="font-semibold text-white mb-2">Informações do Aeroporto</h4>
                       <div className="space-y-2">
-                        <div className="flex items-center text-sm text-gray-600">
+                        <div className="flex items-center text-sm text-white/70">
                           <MapPin className="w-4 h-4 mr-2" />
-                          <span>Distância até o hotel: Calculando...</span>
+                          <span>Selecione um hotel para calcular distância</span>
                         </div>
-                        <div className="flex items-center text-sm text-gray-600">
+                        <div className="flex items-center text-sm text-white/70">
                           <Clock className="w-4 h-4 mr-2" />
-                          <span>Tempo estimado: 45 min</span>
+                          <span>Tempo estimado: A definir</span>
                         </div>
                       </div>
                     </div>
@@ -192,35 +192,17 @@ export function FlightDetails({ onNavigate }: FlightDetailsProps) {
 
           {/* Airport Distance Information */}
           <GlassCard className="p-6">
-            <h3 className="text-xl font-semibold text-[#1A202C] mb-4">Distâncias dos Aeroportos</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                <div className="flex items-center">
-                  <MapPin className="w-5 h-5 text-blue-600 mr-3" />
-                  <div>
-                    <div className="font-semibold">Aeroporto → Primeiro Hotel</div>
-                    <div className="text-sm text-gray-600">Hotel Central Plaza</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-semibold">24 km</div>
-                  <div className="text-sm text-gray-600">~35 min</div>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                <div className="flex items-center">
-                  <MapPin className="w-5 h-5 text-green-600 mr-3" />
-                  <div>
-                    <div className="font-semibold">Último Hotel → Aeroporto</div>
-                    <div className="text-sm text-gray-600">Beach Resort</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-semibold">18 km</div>
-                  <div className="text-sm text-gray-600">~25 min</div>
-                </div>
-              </div>
+            <h3 className="text-xl font-semibold text-white mb-4">Distâncias dos Aeroportos</h3>
+            <div className="text-center py-8">
+              <MapPin className="w-16 h-16 text-white/40 mx-auto mb-4" />
+              <h4 className="text-lg font-semibold text-white mb-2">Nenhum hotel cadastrado</h4>
+              <p className="text-white/70 mb-4">Adicione hotéis na aba "Hospedagens" para ver as distâncias calculadas</p>
+              <Button 
+                onClick={() => onNavigate("accommodations")}
+                className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white"
+              >
+                Ir para Hospedagens
+              </Button>
             </div>
           </GlassCard>
         </div>

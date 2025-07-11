@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -31,8 +31,20 @@ interface CreateTripProps {
 export function CreateTrip({ onNavigate }: CreateTripProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
+  const [editingTrip, setEditingTrip] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Check if we're editing an existing trip
+  useEffect(() => {
+    const storedTrip = localStorage.getItem('editingTrip');
+    if (storedTrip) {
+      const trip = JSON.parse(storedTrip);
+      setEditingTrip(trip);
+      setSelectedStyles(trip.travelStyle || []);
+      localStorage.removeItem('editingTrip');
+    }
+  }, []);
 
   const {
     register,
@@ -41,6 +53,17 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
     formState: { errors },
   } = useForm<CreateTripFormData>({
     resolver: zodResolver(createTripSchema),
+    defaultValues: editingTrip ? {
+      name: editingTrip.name,
+      destination: editingTrip.destination,
+      budget: editingTrip.budget,
+      preferences: editingTrip.preferences,
+      startDate: editingTrip.startDate?.split('T')[0],
+      endDate: editingTrip.endDate?.split('T')[0],
+      cities: editingTrip.cities,
+      activities: editingTrip.activities,
+      avoidances: editingTrip.avoidances,
+    } : {},
   });
 
   const createTripMutation = useMutation({
@@ -146,8 +169,12 @@ export function CreateTrip({ onNavigate }: CreateTripProps) {
       <div className="max-w-2xl mx-auto">
         <GlassCard className="p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Criar Sua Viagem Perfeita</h1>
-            <p className="text-white/80">Deixe nosso assistente IA ajudar você a planejar uma jornada inesquecível</p>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              {editingTrip ? "Editar Viagem" : "Criar Sua Viagem Perfeita"}
+            </h1>
+            <p className="text-white/80">
+              {editingTrip ? "Modifique os detalhes da sua viagem" : "Deixe nosso assistente IA ajudar você a planejar uma jornada inesquecível"}
+            </p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

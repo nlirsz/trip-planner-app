@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ interface ItineraryProps {
 export function Itinerary({ onNavigate }: ItineraryProps) {
   const [selectedTrip, setSelectedTrip] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
 
   const { data: trips = [], isLoading } = useQuery({
     queryKey: ["/api/trips"],
@@ -28,6 +29,18 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
   });
 
   const selectedTripData = trips.find((trip: any) => trip.id === selectedTrip);
+  
+  // Set calendar month to trip start date when trip is selected
+  useEffect(() => {
+    if (selectedTripData && selectedTripData.startDate) {
+      const tripStartDate = new Date(selectedTripData.startDate);
+      setCalendarMonth(tripStartDate);
+      // Auto-select first day of trip if no date selected
+      if (!selectedDate) {
+        setSelectedDate(tripStartDate);
+      }
+    }
+  }, [selectedTripData, selectedDate]);
   const selectedDateItems = itineraryItems.filter((item: any) => 
     selectedDate && isSameDay(new Date(item.date), selectedDate)
   );
@@ -104,25 +117,27 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
           {/* Calendar */}
           <div className="lg:col-span-1">
             <GlassCard className="p-6">
-              <h3 className="text-xl font-semibold text-[#1A202C] mb-4">Calendário da Viagem</h3>
+              <h3 className="text-xl font-semibold text-white mb-4">Calendário da Viagem</h3>
               <Calendar
                 mode="single"
                 selected={selectedDate}
                 onSelect={setSelectedDate}
-                className="rounded-md border"
+                month={calendarMonth}
+                onMonthChange={setCalendarMonth}
+                className="rounded-md border bg-white/10 text-white"
                 locale={ptBR}
                 disabled={(date) => !tripDates.some(tripDate => isSameDay(date, tripDate))}
               />
               
               {selectedTripData && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                  <h4 className="font-semibold text-blue-900 mb-2">{selectedTripData.name}</h4>
+                <div className="mt-4 p-4 bg-white/10 rounded-lg">
+                  <h4 className="font-semibold text-white mb-2">{selectedTripData.name}</h4>
                   <div className="space-y-2 text-sm">
-                    <div className="flex items-center text-blue-700">
+                    <div className="flex items-center text-white/90">
                       <MapPin className="w-4 h-4 mr-2" />
                       {selectedTripData.destination}
                     </div>
-                    <div className="flex items-center text-blue-700">
+                    <div className="flex items-center text-white/90">
                       <CalendarIcon className="w-4 h-4 mr-2" />
                       {format(new Date(selectedTripData.startDate), "dd/MM", { locale: ptBR })} - {format(new Date(selectedTripData.endDate), "dd/MM", { locale: ptBR })}
                     </div>
@@ -138,10 +153,10 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
               <GlassCard className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h3 className="text-xl font-semibold text-[#1A202C]">
+                    <h3 className="text-xl font-semibold text-white">
                       {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
                     </h3>
-                    <p className="text-gray-600">Cidade: São Paulo</p>
+                    <p className="text-white/80">Cidade: {selectedTripData?.destination}</p>
                   </div>
                   <div className="flex space-x-2">
                     <Button size="sm" variant="outline">
@@ -157,9 +172,9 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
 
                 {selectedDateItems.length === 0 ? (
                   <div className="text-center py-12">
-                    <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h4 className="text-lg font-semibold text-[#1A202C] mb-2">Nenhuma atividade programada</h4>
-                    <p className="text-gray-600 mb-4">Adicione atividades ou deixe a IA criar um cronograma perfeito para você</p>
+                    <CalendarIcon className="w-16 h-16 text-white/40 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-white mb-2">Nenhuma atividade programada</h4>
+                    <p className="text-white/70 mb-4">Adicione atividades ou deixe a IA criar um cronograma perfeito para você</p>
                     <Button className="bg-[#F093FB] hover:bg-[#F093FB]/90 text-white">
                       <Sparkles className="w-4 h-4 mr-2" />
                       Gerar Cronograma com IA
@@ -186,17 +201,17 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
                             )}
                           </div>
                           
-                          <h4 className="font-semibold text-[#1A202C] mb-1">{item.activity}</h4>
+                          <h4 className="font-semibold text-white mb-1">{item.activity}</h4>
                           
                           {item.location && (
-                            <p className="text-sm text-gray-600 flex items-center mb-2">
+                            <p className="text-sm text-white/70 flex items-center mb-2">
                               <MapPin className="w-4 h-4 mr-1" />
                               {item.location}
                             </p>
                           )}
                           
                           {item.notes && (
-                            <p className="text-sm text-gray-600 mb-2">{item.notes}</p>
+                            <p className="text-sm text-white/70 mb-2">{item.notes}</p>
                           )}
                           
                           {item.estimatedCost && (

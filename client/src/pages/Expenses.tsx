@@ -67,8 +67,8 @@ export function Expenses({ onNavigate }: ExpensesProps) {
   const loadWiseExpenses = async (tripId: number) => {
     if (!isWiseConfigured()) {
       toast({
-        title: "Wise API não configurada",
-        description: "Configure sua API key da Wise para sincronizar gastos automaticamente.",
+        title: "Wise API não disponível",
+        description: "A integração com Wise está em desenvolvimento. Use o cadastro manual de gastos.",
         variant: "destructive",
       });
       return;
@@ -105,8 +105,8 @@ export function Expenses({ onNavigate }: ExpensesProps) {
     } catch (error) {
       console.error("Erro ao carregar gastos da Wise:", error);
       toast({
-        title: "Erro ao sincronizar",
-        description: "Não foi possível carregar os gastos da Wise.",
+        title: "Wise não disponível",
+        description: "A integração com Wise está sendo desenvolvida. Use o cadastro manual por enquanto.",
         variant: "destructive",
       });
     } finally {

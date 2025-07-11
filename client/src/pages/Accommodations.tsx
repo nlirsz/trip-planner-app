@@ -118,8 +118,8 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
                   <div className="lg:col-span-2">
                     <GlassCard className="p-8 text-center">
                       <MapPin className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-[#1A202C] mb-2">Nenhuma reserva adicionada</h3>
-                      <p className="text-gray-600 mb-4">Adicione suas reservas de hotel para organizar melhor sua viagem</p>
+                      <h3 className="text-xl font-semibold text-white mb-2">Nenhuma reserva adicionada</h3>
+                      <p className="text-white/80 mb-4">Adicione suas reservas de hotel para organizar melhor sua viagem</p>
                       <Button className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white">
                         <Plus className="w-4 h-4 mr-2" />
                         Adicionar Primeira Reserva
@@ -222,7 +222,7 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
                 <h3 className="text-xl font-semibold text-white">Sugestões da IA</h3>
                 <Button className="bg-[#F093FB] hover:bg-[#F093FB]/90 text-white">
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Gerar Novas Sugestões
+                  Gerar Sugestões de Hotéis
                 </Button>
               </div>
 
@@ -268,13 +268,13 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
                       
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-[#1A202C]">{suggestion.name}</h4>
+                          <h4 className="font-semibold text-white">{suggestion.name}</h4>
                           <div className="flex items-center">
                             <Star className="w-4 h-4 text-yellow-500 mr-1" />
-                            <span className="text-sm text-gray-600">{suggestion.rating}</span>
+                            <span className="text-sm text-white/70">{suggestion.rating}</span>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-600 flex items-center">
+                        <p className="text-sm text-white/70 flex items-center">
                           <MapPin className="w-4 h-4 mr-1" />
                           {suggestion.address}, {suggestion.city}
                         </p>
@@ -282,7 +282,7 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
 
                       <div className="flex items-center justify-between">
                         <span className="text-lg font-semibold text-[#667EEA]">{suggestion.price}</span>
-                        <Badge variant="secondary">IA</Badge>
+                        <Badge variant="secondary" className="bg-[#F093FB]/20 text-[#F093FB]">IA</Badge>
                       </div>
 
                       <div className="flex flex-wrap gap-1">
