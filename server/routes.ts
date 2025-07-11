@@ -1,7 +1,16 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertTripSchema, insertDocumentSchema } from "@shared/schema";
+import { 
+  insertUserSchema, 
+  insertTripSchema, 
+  insertDocumentSchema,
+  insertFlightSchema,
+  insertAccommodationSchema,
+  insertItineraryItemSchema,
+  insertExpenseSchema,
+  insertTravelDocumentSchema
+} from "@shared/schema";
 import { GoogleGenAI } from "@google/genai";
 import multer from "multer";
 import path from "path";
@@ -302,6 +311,238 @@ END:VCALENDAR`;
       res.send(icsContent);
     } catch (error) {
       res.status(500).json({ message: "Failed to generate calendar export" });
+    }
+  });
+
+  // Flight routes
+  app.get("/api/trips/:tripId/flights", async (req, res) => {
+    try {
+      const flights = await storage.getFlightsByTripId(parseInt(req.params.tripId));
+      res.json(flights);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get flights" });
+    }
+  });
+
+  app.post("/api/flights", async (req, res) => {
+    try {
+      const validatedData = insertFlightSchema.parse(req.body);
+      const flight = await storage.createFlight(validatedData);
+      res.json(flight);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid flight data" });
+    }
+  });
+
+  app.put("/api/flights/:id", async (req, res) => {
+    try {
+      const flight = await storage.updateFlight(parseInt(req.params.id), req.body);
+      res.json(flight);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update flight" });
+    }
+  });
+
+  app.delete("/api/flights/:id", async (req, res) => {
+    try {
+      await storage.deleteFlight(parseInt(req.params.id));
+      res.json({ message: "Flight deleted" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete flight" });
+    }
+  });
+
+  // Accommodation routes
+  app.get("/api/trips/:tripId/accommodations", async (req, res) => {
+    try {
+      const accommodations = await storage.getAccommodationsByTripId(parseInt(req.params.tripId));
+      res.json(accommodations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get accommodations" });
+    }
+  });
+
+  app.post("/api/accommodations", async (req, res) => {
+    try {
+      const validatedData = insertAccommodationSchema.parse(req.body);
+      const accommodation = await storage.createAccommodation(validatedData);
+      res.json(accommodation);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid accommodation data" });
+    }
+  });
+
+  app.put("/api/accommodations/:id", async (req, res) => {
+    try {
+      const accommodation = await storage.updateAccommodation(parseInt(req.params.id), req.body);
+      res.json(accommodation);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update accommodation" });
+    }
+  });
+
+  app.delete("/api/accommodations/:id", async (req, res) => {
+    try {
+      await storage.deleteAccommodation(parseInt(req.params.id));
+      res.json({ message: "Accommodation deleted" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete accommodation" });
+    }
+  });
+
+  // Itinerary routes
+  app.get("/api/trips/:tripId/itinerary", async (req, res) => {
+    try {
+      const items = await storage.getItineraryItemsByTripId(parseInt(req.params.tripId));
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get itinerary items" });
+    }
+  });
+
+  app.post("/api/itinerary", async (req, res) => {
+    try {
+      const validatedData = insertItineraryItemSchema.parse(req.body);
+      const item = await storage.createItineraryItem(validatedData);
+      res.json(item);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid itinerary item data" });
+    }
+  });
+
+  app.put("/api/itinerary/:id", async (req, res) => {
+    try {
+      const item = await storage.updateItineraryItem(parseInt(req.params.id), req.body);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update itinerary item" });
+    }
+  });
+
+  app.delete("/api/itinerary/:id", async (req, res) => {
+    try {
+      await storage.deleteItineraryItem(parseInt(req.params.id));
+      res.json({ message: "Itinerary item deleted" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete itinerary item" });
+    }
+  });
+
+  // Expense routes
+  app.get("/api/trips/:tripId/expenses", async (req, res) => {
+    try {
+      const expenses = await storage.getExpensesByTripId(parseInt(req.params.tripId));
+      res.json(expenses);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get expenses" });
+    }
+  });
+
+  app.post("/api/expenses", async (req, res) => {
+    try {
+      const validatedData = insertExpenseSchema.parse(req.body);
+      const expense = await storage.createExpense({
+        ...validatedData,
+        userId: CURRENT_USER_ID
+      });
+      res.json(expense);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid expense data" });
+    }
+  });
+
+  app.put("/api/expenses/:id", async (req, res) => {
+    try {
+      const expense = await storage.updateExpense(parseInt(req.params.id), req.body);
+      res.json(expense);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update expense" });
+    }
+  });
+
+  app.delete("/api/expenses/:id", async (req, res) => {
+    try {
+      await storage.deleteExpense(parseInt(req.params.id));
+      res.json({ message: "Expense deleted" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete expense" });
+    }
+  });
+
+  // Travel document routes
+  app.get("/api/trips/:tripId/travel-documents", async (req, res) => {
+    try {
+      const documents = await storage.getTravelDocumentsByTripId(parseInt(req.params.tripId));
+      res.json(documents);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get travel documents" });
+    }
+  });
+
+  app.post("/api/travel-documents", async (req, res) => {
+    try {
+      const validatedData = insertTravelDocumentSchema.parse(req.body);
+      const document = await storage.createTravelDocument(validatedData);
+      res.json(document);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid travel document data" });
+    }
+  });
+
+  app.put("/api/travel-documents/:id", async (req, res) => {
+    try {
+      const document = await storage.updateTravelDocument(parseInt(req.params.id), req.body);
+      res.json(document);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update travel document" });
+    }
+  });
+
+  app.delete("/api/travel-documents/:id", async (req, res) => {
+    try {
+      await storage.deleteTravelDocument(parseInt(req.params.id));
+      res.json({ message: "Travel document deleted" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete travel document" });
+    }
+  });
+
+  // AI suggestions for accommodations
+  app.post("/api/accommodations/suggestions", async (req, res) => {
+    try {
+      const { destination, checkIn, checkOut, budget, preferences } = req.body;
+      
+      const prompt = `Generate hotel and accommodation suggestions for ${destination} from ${checkIn} to ${checkOut}.
+      
+Budget: ${budget || "Not specified"}
+Preferences: ${preferences || "None"}
+
+Provide 3-5 realistic suggestions in JSON format:
+{
+  "suggestions": [
+    {
+      "name": "Hotel Name",
+      "type": "hotel/hostel/apartment",
+      "address": "Full address",
+      "city": "${destination}",
+      "estimatedPrice": "price range",
+      "rating": "4.5/5",
+      "amenities": ["wifi", "breakfast", "pool"],
+      "description": "Brief description"
+    }
+  ]
+}`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+
+      const suggestions = JSON.parse(response.text || "{}");
+      res.json(suggestions);
+    } catch (error) {
+      console.error("AI accommodation suggestions error:", error);
+      res.status(500).json({ message: "Failed to generate accommodation suggestions" });
     }
   });
 

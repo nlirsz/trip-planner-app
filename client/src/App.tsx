@@ -64,7 +64,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen bg-gradient-to-br from-[#667EEA] to-[#764BA2]">
+        <div className="min-h-screen bg-gradient-to-br from-[#1a1a1a] via-[#2d2d2d] to-[#1a1a1a]">
           <Navigation 
             onSectionChange={handleSectionChange} 
             currentSection={currentSection}

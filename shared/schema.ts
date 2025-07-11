@@ -133,6 +133,7 @@ export const insertDocumentSchema = createInsertSchema(documents).pick({
 });
 
 export const insertFlightSchema = createInsertSchema(flights).pick({
+  tripId: true,
   flightNumber: true,
   airline: true,
   departureAirport: true,
@@ -146,6 +147,7 @@ export const insertFlightSchema = createInsertSchema(flights).pick({
 });
 
 export const insertAccommodationSchema = createInsertSchema(accommodations).pick({
+  tripId: true,
   name: true,
   address: true,
   city: true,
@@ -161,6 +163,7 @@ export const insertAccommodationSchema = createInsertSchema(accommodations).pick
 });
 
 export const insertItineraryItemSchema = createInsertSchema(itineraryItems).pick({
+  tripId: true,
   date: true,
   city: true,
   time: true,
@@ -173,6 +176,7 @@ export const insertItineraryItemSchema = createInsertSchema(itineraryItems).pick
 });
 
 export const insertExpenseSchema = createInsertSchema(expenses).pick({
+  tripId: true,
   amount: true,
   currency: true,
   description: true,
@@ -183,6 +187,7 @@ export const insertExpenseSchema = createInsertSchema(expenses).pick({
 });
 
 export const insertTravelDocumentSchema = createInsertSchema(travelDocuments).pick({
+  tripId: true,
   documentType: true,
   documentName: true,
   expiryDate: true,

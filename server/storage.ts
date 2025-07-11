@@ -163,12 +163,19 @@ export class MemStorage implements IStorage {
 
   async createFlight(flight: InsertFlight): Promise<Flight> {
     const newFlight: Flight = {
-      ...flight,
       id: this.currentFlightId++,
-      createdAt: new Date(),
+      tripId: flight.tripId,
+      flightNumber: flight.flightNumber,
+      airline: flight.airline,
+      departureAirport: flight.departureAirport,
+      arrivalAirport: flight.arrivalAirport,
+      departureTime: flight.departureTime,
+      arrivalTime: flight.arrivalTime,
+      type: flight.type,
       confirmationCode: flight.confirmationCode || null,
       gate: flight.gate || null,
       seat: flight.seat || null,
+      createdAt: new Date(),
     };
     this.flights.set(newFlight.id, newFlight);
     return newFlight;
@@ -195,15 +202,21 @@ export class MemStorage implements IStorage {
 
   async createAccommodation(accommodation: InsertAccommodation): Promise<Accommodation> {
     const newAccommodation: Accommodation = {
-      ...accommodation,
       id: this.currentAccommodationId++,
-      createdAt: new Date(),
+      tripId: accommodation.tripId,
+      name: accommodation.name,
+      address: accommodation.address,
+      city: accommodation.city,
+      checkIn: accommodation.checkIn,
+      checkOut: accommodation.checkOut,
+      type: accommodation.type,
       confirmationCode: accommodation.confirmationCode || null,
       checkInTime: accommodation.checkInTime || null,
       checkOutTime: accommodation.checkOutTime || null,
       price: accommodation.price || null,
       contactInfo: accommodation.contactInfo || null,
       amenities: accommodation.amenities || null,
+      createdAt: new Date(),
     };
     this.accommodations.set(newAccommodation.id, newAccommodation);
     return newAccommodation;
@@ -230,14 +243,18 @@ export class MemStorage implements IStorage {
 
   async createItineraryItem(item: InsertItineraryItem): Promise<ItineraryItem> {
     const newItem: ItineraryItem = {
-      ...item,
       id: this.currentItineraryItemId++,
-      createdAt: new Date(),
+      tripId: item.tripId,
+      date: item.date,
+      city: item.city,
+      time: item.time,
+      activity: item.activity,
       location: item.location || null,
       notes: item.notes || null,
       category: item.category || null,
       duration: item.duration || null,
       estimatedCost: item.estimatedCost || null,
+      createdAt: new Date(),
     };
     this.itineraryItems.set(newItem.id, newItem);
     return newItem;
@@ -264,11 +281,17 @@ export class MemStorage implements IStorage {
 
   async createExpense(expense: InsertExpense & { userId: number }): Promise<Expense> {
     const newExpense: Expense = {
-      ...expense,
       id: this.currentExpenseId++,
-      createdAt: new Date(),
+      tripId: expense.tripId,
+      userId: expense.userId,
+      amount: expense.amount,
+      currency: expense.currency,
+      description: expense.description,
+      category: expense.category,
+      date: expense.date,
       city: expense.city || null,
       wiseTransactionId: expense.wiseTransactionId || null,
+      createdAt: new Date(),
     };
     this.expenses.set(newExpense.id, newExpense);
     return newExpense;
@@ -295,13 +318,15 @@ export class MemStorage implements IStorage {
 
   async createTravelDocument(document: InsertTravelDocument): Promise<TravelDocument> {
     const newDocument: TravelDocument = {
-      ...document,
       id: this.currentTravelDocumentId++,
-      createdAt: new Date(),
+      tripId: document.tripId,
+      documentType: document.documentType,
+      documentName: document.documentName,
       notes: document.notes || null,
       expiryDate: document.expiryDate || null,
       required: document.required || null,
       obtained: document.obtained || null,
+      createdAt: new Date(),
     };
     this.travelDocuments.set(newDocument.id, newDocument);
     return newDocument;
