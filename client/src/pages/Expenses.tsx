@@ -201,7 +201,7 @@ export function Expenses({ onNavigate }: ExpensesProps) {
                   value={selectedTrip?.toString()}
                   onValueChange={(value) => setSelectedTrip(parseInt(value))}
                 >
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectTrigger className="bg-black/30 border-white/20 text-white">
                     <SelectValue placeholder="Selecione uma viagem" />
                   </SelectTrigger>
                   <SelectContent>
@@ -511,7 +511,7 @@ export function Expenses({ onNavigate }: ExpensesProps) {
             <CardContent className="text-center py-12">
               <DollarSign className="h-16 w-16 text-white/50 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2">Selecione uma Viagem</h3>
-              <p className="text-white/70 mb-4">Escolha uma viagem para ver e gerenciar seus gastos</p>
+              <p className="text-white/90 mb-4">Escolha uma viagem para ver e gerenciar seus gastos</p>
               <Button
                 onClick={() => onNavigate("create-trip")}
                 className="bg-blue-600 hover:bg-blue-700"

@@ -80,13 +80,20 @@ export function Navigation({ onSectionChange, currentSection }: NavigationProps)
                 key={item.id}
                 onClick={() => onSectionChange(item.id)}
                 className={cn(
-                  "flex flex-col items-center space-y-1 transition-colors",
+                  "flex flex-col items-center space-y-1 transition-colors relative",
                   currentSection === item.id
                     ? "text-white"
                     : "text-white/80 hover:text-white"
                 )}
               >
-                <Icon className="w-5 h-5" />
+                <div className={cn(
+                  "relative transition-all duration-300",
+                  currentSection === item.id 
+                    ? "bg-white/20 backdrop-blur-sm rounded-full p-2 shadow-lg border border-white/30" 
+                    : "p-2"
+                )}>
+                  <Icon className="w-5 h-5" />
+                </div>
                 <span className="text-xs font-medium">{item.label}</span>
               </button>
             );

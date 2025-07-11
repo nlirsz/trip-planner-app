@@ -43,7 +43,7 @@ export function FlightDetails({ onNavigate }: FlightDetailsProps) {
       {/* Trip Selection */}
       <div className="mb-6">
         <GlassCard className="p-6">
-          <h3 className="text-xl font-semibold text-[#1A202C] mb-4">Selecione uma Viagem</h3>
+          <h3 className="text-xl font-semibold text-white mb-4">Selecione uma Viagem</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {trips.map((trip: any) => (
               <button
@@ -56,9 +56,9 @@ export function FlightDetails({ onNavigate }: FlightDetailsProps) {
                 }`}
               >
                 <div className="text-left">
-                  <h4 className="font-semibold text-[#1A202C]">{trip.name}</h4>
-                  <p className="text-sm text-gray-600">{trip.destination}</p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <h4 className="font-semibold text-white">{trip.name}</h4>
+                  <p className="text-sm text-white/90">{trip.destination}</p>
+                  <p className="text-xs text-white/80 mt-1">
                     {format(new Date(trip.startDate), "dd/MM/yyyy", { locale: ptBR })} - {format(new Date(trip.endDate), "dd/MM/yyyy", { locale: ptBR })}
                   </p>
                 </div>
