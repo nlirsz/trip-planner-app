@@ -78,10 +78,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Request body:", req.body);
       const validatedData = insertTripSchema.parse(req.body);
       console.log("Validated data:", validatedData);
-      const trip = await storage.createTrip({
+      
+      // Keep dates as strings for simplicity in storage
+      const tripData = {
         ...validatedData,
         userId: CURRENT_USER_ID
-      });
+      };
+      
+      const trip = await storage.createTrip(tripData);
       res.json(trip);
     } catch (error) {
       console.error("Trip creation error:", error);
@@ -306,8 +310,8 @@ VERSION:2.0
 PRODID:-//TravelAI//Travel Assistant//EN
 BEGIN:VEVENT
 UID:${trip.id}@travelai.com
-DTSTART:${trip.startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
-DTEND:${trip.endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTSTART:${trip.startDate.replace(/[-:]/g, '')}T000000Z
+DTEND:${trip.endDate.replace(/[-:]/g, '')}T000000Z
 SUMMARY:${trip.name}
 DESCRIPTION:Trip to ${trip.destination}
 LOCATION:${trip.destination}
