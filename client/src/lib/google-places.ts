@@ -212,7 +212,7 @@ class GooglePlacesService {
 
 // Export singleton instance
 export const googlePlaces = new GooglePlacesService({
-  apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+  apiKey: import.meta.env.VITE_GOOGLE_PLACES_API_KEY || '',
 });
 
 // Helper functions for common searches

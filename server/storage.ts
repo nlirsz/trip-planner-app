@@ -73,6 +73,129 @@ export class MemStorage implements IStorage {
   private currentExpenseId = 1;
   private currentTravelDocumentId = 1;
 
+  constructor() {
+    // Inicializar com dados de exemplo
+    this.initializeExampleData();
+  }
+
+  private initializeExampleData() {
+    // Criar usuário de exemplo
+    const user: User = {
+      id: 1,
+      email: "alex@example.com",
+      name: "Alex Johnson",
+      createdAt: new Date(),
+    };
+    this.users.set(1, user);
+
+    // Criar viagem de exemplo se não existir
+    if (!this.trips.has(1)) {
+      const trip: Trip = {
+        id: 1,
+        userId: 1,
+        name: "Viagem Rio de Janeiro",
+        destination: "Rio de Janeiro, RJ",
+        startDate: "2025-02-15",
+        endDate: "2025-02-20",
+        budget: "3000",
+        travelStyle: ["luxury", "cultural"],
+        preferences: "Praias, museus, vida noturna",
+        status: "planning",
+        itinerary: null,
+        packingList: null,
+        createdAt: new Date(),
+      };
+      this.trips.set(1, trip);
+      this.currentTripId = 2;
+    }
+
+    // Criar itinerário de exemplo
+    const itineraryItems: ItineraryItem[] = [
+      {
+        id: 1,
+        tripId: 1,
+        date: new Date("2025-02-15"),
+        city: "Rio de Janeiro",
+        time: "10:00",
+        activity: "Check-in no hotel",
+        location: "Copacabana",
+        notes: "Hotel com vista para o mar",
+        category: "accommodation",
+        duration: "30 min",
+        estimatedCost: "0",
+        createdAt: new Date(),
+      },
+      {
+        id: 2,
+        tripId: 1,
+        date: new Date("2025-02-15"),
+        city: "Rio de Janeiro",
+        time: "14:00",
+        activity: "Visita ao Pão de Açúcar",
+        location: "Urca",
+        notes: "Bondinho panorâmico",
+        category: "attraction",
+        duration: "3 horas",
+        estimatedCost: "120",
+        createdAt: new Date(),
+      },
+      {
+        id: 3,
+        tripId: 1,
+        date: new Date("2025-02-16"),
+        city: "Rio de Janeiro",
+        time: "09:00",
+        activity: "Cristo Redentor",
+        location: "Corcovado",
+        notes: "Trem do Corcovado",
+        category: "attraction",
+        duration: "4 horas",
+        estimatedCost: "80",
+        createdAt: new Date(),
+      },
+    ];
+
+    itineraryItems.forEach((item) => {
+      this.itineraryItems.set(item.id, item);
+    });
+    this.currentItineraryItemId = 4;
+
+    // Criar despesas de exemplo
+    const expenses: Expense[] = [
+      {
+        id: 1,
+        tripId: 1,
+        userId: 1,
+        amount: "150",
+        currency: "BRL",
+        description: "Jantar no restaurante",
+        category: "food",
+        city: "Rio de Janeiro",
+        date: new Date("2025-02-15"),
+        wiseTransactionId: null,
+        createdAt: new Date(),
+      },
+      {
+        id: 2,
+        tripId: 1,
+        userId: 1,
+        amount: "80",
+        currency: "BRL",
+        description: "Transporte Uber",
+        category: "transport",
+        city: "Rio de Janeiro",
+        date: new Date("2025-02-15"),
+        wiseTransactionId: null,
+        createdAt: new Date(),
+      },
+    ];
+
+    expenses.forEach((expense) => {
+      this.expenses.set(expense.id, expense);
+    });
+    this.currentExpenseId = 3;
+  }
+
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
