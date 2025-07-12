@@ -18,6 +18,7 @@ import * as z from "zod";
 import { MapPin, Calendar, Clock, Star, Wifi, Car, Coffee, Plus, FileText, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { googlePlaces, searchHotelsInDestination } from "@/lib/google-places";
 
 interface AccommodationsProps {
   onNavigate: (section: string) => void;
@@ -115,32 +116,66 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
     mutationFn: async () => {
       if (!selectedTrip || !selectedTripData) return;
       
-      return apiRequest("/api/accommodations/suggestions", {
-        method: "POST",
-        body: {
-          destination: selectedTripData.destination,
-          checkIn: selectedTripData.startDate,
-          checkOut: selectedTripData.endDate,
-          budget: selectedTripData.budget,
-          preferences: selectedTripData.preferences,
-        },
-      });
+      try {
+        // Use Google Places API to get real hotel suggestions
+        const hotels = await searchHotelsInDestination(selectedTripData.destination);
+        
+        // Transform Google Places results to our format
+        const suggestions = hotels.map(hotel => ({
+          name: hotel.name,
+          address: hotel.formatted_address,
+          rating: hotel.rating || 0,
+          price_level: hotel.price_level || 0,
+          place_id: hotel.place_id,
+          types: hotel.types || [],
+          vicinity: hotel.vicinity || '',
+          photos: hotel.photos || [],
+          description: `Hotel em ${hotel.vicinity || selectedTripData.destination}`,
+          amenities: hotel.types.filter(type => ['wifi', 'parking', 'restaurant', 'spa', 'gym', 'pool'].includes(type.toLowerCase())),
+        }));
+        
+        setAiSuggestions(suggestions);
+        return suggestions;
+      } catch (error) {
+        console.error('Error fetching hotel suggestions:', error);
+        
+        // Fallback to backend API if Google Places fails
+        const response = await apiRequest("/api/accommodations/suggestions", {
+          method: "POST",
+          body: {
+            destination: selectedTripData.destination,
+            checkIn: selectedTripData.startDate,
+            checkOut: selectedTripData.endDate,
+            budget: selectedTripData.budget,
+            preferences: selectedTripData.preferences,
+          },
+        });
+        return response;
+      }
     },
-    onSuccess: async (response) => {
-      const data = await response.json();
-      if (data?.suggestions) {
-        setAiSuggestions(data.suggestions);
+    onSuccess: async (result) => {
+      if (Array.isArray(result)) {
+        setAiSuggestions(result);
         toast({
           title: "Sugestões geradas!",
-          description: "A IA encontrou ótimas opções de hospedagem para você.",
+          description: "Encontramos hotéis reais usando Google Places API.",
         });
+      } else if (result) {
+        const data = await result.json();
+        if (data?.suggestions) {
+          setAiSuggestions(data.suggestions);
+          toast({
+            title: "Sugestões geradas!",
+            description: "A IA encontrou ótimas opções de hospedagem para você.",
+          });
+        }
       }
       setIsGeneratingSuggestions(false);
     },
     onError: () => {
       toast({
         title: "Erro ao gerar sugestões",
-        description: "Tente novamente mais tarde.",
+        description: "Verifique se a chave da API do Google Places está configurada.",
         variant: "destructive",
       });
       setIsGeneratingSuggestions(false);

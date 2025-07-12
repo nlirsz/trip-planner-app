@@ -13,9 +13,10 @@ import { apiRequest } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Plane, MapPin, Clock, Calendar, QrCode, Plus, AlertCircle } from "lucide-react";
+import { Plane, MapPin, Clock, Calendar, QrCode, Plus, AlertCircle, Search, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { searchOneWayFlights, searchRoundTripFlights } from "@/lib/flight-search";
 
 interface FlightDetailsProps {
   onNavigate: (section: string) => void;
@@ -39,6 +40,16 @@ type AddFlightForm = z.infer<typeof addFlightSchema>;
 export function FlightDetails({ onNavigate }: FlightDetailsProps) {
   const [selectedTrip, setSelectedTrip] = useState<number | null>(null);
   const [showAddFlight, setShowAddFlight] = useState(false);
+  const [showFlightSearch, setShowFlightSearch] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchParams, setSearchParams] = useState({
+    departure: '',
+    arrival: '',
+    departureDate: '',
+    returnDate: '',
+    adults: 1,
+  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -102,6 +113,63 @@ export function FlightDetails({ onNavigate }: FlightDetailsProps) {
 
   const handleAddFlight = (data: AddFlightForm) => {
     addFlightMutation.mutate(data);
+  };
+
+  const handleFlightSearch = async () => {
+    if (!searchParams.departure || !searchParams.arrival || !searchParams.departureDate) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha pelo menos origem, destino e data de partida.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      let results;
+      if (searchParams.returnDate) {
+        // Round trip search
+        results = await searchRoundTripFlights(
+          searchParams.departure,
+          searchParams.arrival,
+          searchParams.departureDate,
+          searchParams.returnDate,
+          searchParams.adults
+        );
+      } else {
+        // One way search
+        results = await searchOneWayFlights(
+          searchParams.departure,
+          searchParams.arrival,
+          searchParams.departureDate,
+          searchParams.adults
+        );
+      }
+
+      if (results?.best_flights) {
+        setSearchResults(results.best_flights);
+        toast({
+          title: "Busca concluída!",
+          description: `Encontramos ${results.best_flights.length} voos disponíveis.`,
+        });
+      } else {
+        toast({
+          title: "Nenhum voo encontrado",
+          description: "Tente alterar os parâmetros de busca.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Flight search error:', error);
+      toast({
+        title: "Erro na busca",
+        description: "Verifique se a chave da API está configurada corretamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   if (isLoading) {

@@ -16,6 +16,7 @@ import { Packing } from "@/pages/Packing";
 import { Expenses } from "@/pages/Expenses";
 import { TravelDocs } from "@/pages/TravelDocs";
 import { Trip } from "@shared/schema";
+import { Maps } from "./pages/Maps";
 
 function App() {
   const [currentSection, setCurrentSection] = useState("dashboard");
@@ -52,6 +53,8 @@ function App() {
         return <Expenses onNavigate={handleSectionChange} />;
       case "travel-docs":
         return <TravelDocs onNavigate={handleSectionChange} />;
+      case "maps":
+        return <Maps onNavigate={handleSectionChange} />;
       case "create-trip":
         return <CreateTrip onNavigate={handleSectionChange} />;
       case "documents":
