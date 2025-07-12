@@ -387,6 +387,21 @@ END:VCALENDAR`;
       const accommodation = await storage.createAccommodation(validatedData);
       res.json(accommodation);
     } catch (error) {
+      console.error("Accommodation validation error:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid accommodation data", errors: error.errors });
+      } else {
+        res.status(400).json({ message: "Invalid accommodation data" });
+      }
+    }
+  });
+
+  app.post("/api/accommodations", async (req, res) => {
+    try {
+      const validatedData = insertAccommodationSchema.parse(req.body);
+      const accommodation = await storage.createAccommodation(validatedData);
+      res.json(accommodation);
+    } catch (error) {
       res.status(400).json({ message: "Invalid accommodation data" });
     }
   });
@@ -425,6 +440,21 @@ END:VCALENDAR`;
       const item = await storage.createItineraryItem(validatedData);
       res.json(item);
     } catch (error) {
+      console.error("Itinerary validation error:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid itinerary data", errors: error.errors });
+      } else {
+        res.status(400).json({ message: "Invalid itinerary data" });
+      }
+    }
+  });
+
+  app.post("/api/itinerary", async (req, res) => {
+    try {
+      const validatedData = insertItineraryItemSchema.parse(req.body);
+      const item = await storage.createItineraryItem(validatedData);
+      res.json(item);
+    } catch (error) {
       res.status(400).json({ message: "Invalid itinerary item data" });
     }
   });
@@ -454,6 +484,24 @@ END:VCALENDAR`;
       res.json(expenses);
     } catch (error) {
       res.status(500).json({ message: "Failed to get expenses" });
+    }
+  });
+
+  app.post("/api/expenses", async (req, res) => {
+    try {
+      const validatedData = insertExpenseSchema.parse(req.body);
+      const expense = await storage.createExpense({
+        ...validatedData,
+        userId: CURRENT_USER_ID
+      });
+      res.json(expense);
+    } catch (error) {
+      console.error("Expense validation error:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid expense data", errors: error.errors });
+      } else {
+        res.status(400).json({ message: "Invalid expense data" });
+      }
     }
   });
 

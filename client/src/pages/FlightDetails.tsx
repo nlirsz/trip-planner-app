@@ -1,9 +1,18 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Plane, MapPin, Clock, Calendar, QrCode, Plus, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -12,8 +21,26 @@ interface FlightDetailsProps {
   onNavigate: (section: string) => void;
 }
 
+const addFlightSchema = z.object({
+  flightNumber: z.string().min(1, "Número do voo é obrigatório"),
+  airline: z.string().min(1, "Companhia aérea é obrigatória"),
+  departureAirport: z.string().min(1, "Aeroporto de partida é obrigatório"),
+  arrivalAirport: z.string().min(1, "Aeroporto de chegada é obrigatório"),
+  departureTime: z.string().min(1, "Horário de partida é obrigatório"),
+  arrivalTime: z.string().min(1, "Horário de chegada é obrigatório"),
+  type: z.string().min(1, "Tipo é obrigatório"),
+  seat: z.string().optional(),
+  gate: z.string().optional(),
+  confirmationCode: z.string().optional(),
+});
+
+type AddFlightForm = z.infer<typeof addFlightSchema>;
+
 export function FlightDetails({ onNavigate }: FlightDetailsProps) {
   const [selectedTrip, setSelectedTrip] = useState<number | null>(null);
+  const [showAddFlight, setShowAddFlight] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: trips = [], isLoading } = useQuery({
     queryKey: ["/api/trips"],
@@ -21,9 +48,61 @@ export function FlightDetails({ onNavigate }: FlightDetailsProps) {
   });
 
   const { data: flights = [] } = useQuery({
-    queryKey: ["/api/flights", selectedTrip],
+    queryKey: ["/api/trips", selectedTrip, "flights"],
     enabled: !!selectedTrip,
   });
+
+  const addFlightForm = useForm<AddFlightForm>({
+    resolver: zodResolver(addFlightSchema),
+    defaultValues: {
+      flightNumber: "",
+      airline: "",
+      departureAirport: "",
+      arrivalAirport: "",
+      departureTime: "",
+      arrivalTime: "",
+      type: "outbound",
+      seat: "",
+      gate: "",
+      confirmationCode: "",
+    },
+  });
+
+  const addFlightMutation = useMutation({
+    mutationFn: async (data: AddFlightForm) => {
+      if (!selectedTrip) return;
+      
+      return apiRequest("/api/flights", {
+        method: "POST",
+        body: {
+          ...data,
+          tripId: selectedTrip,
+          departureTime: new Date(data.departureTime).toISOString(),
+          arrivalTime: new Date(data.arrivalTime).toISOString(),
+        },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trips", selectedTrip, "flights"] });
+      setShowAddFlight(false);
+      addFlightForm.reset();
+      toast({
+        title: "Voo adicionado!",
+        description: "O voo foi adicionado com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao adicionar voo",
+        description: "Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddFlight = (data: AddFlightForm) => {
+    addFlightMutation.mutate(data);
+  };
 
   if (isLoading) {
     return (
@@ -72,10 +151,177 @@ export function FlightDetails({ onNavigate }: FlightDetailsProps) {
         <div className="space-y-6">
           {/* Add Flight Button */}
           <div className="flex justify-end">
-            <Button className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar Voo
-            </Button>
+            <Dialog open={showAddFlight} onOpenChange={setShowAddFlight}>
+              <DialogTrigger asChild>
+                <Button className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Voo
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Adicionar Voo</DialogTitle>
+                </DialogHeader>
+                <Form {...addFlightForm}>
+                  <form onSubmit={addFlightForm.handleSubmit(handleAddFlight)} className="space-y-4">
+                    <FormField
+                      control={addFlightForm.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione o tipo" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="outbound">Ida</SelectItem>
+                              <SelectItem value="return">Volta</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={addFlightForm.control}
+                        name="airline"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Companhia Aérea</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Ex: LATAM" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={addFlightForm.control}
+                        name="flightNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Número do Voo</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Ex: LA3050" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={addFlightForm.control}
+                        name="departureAirport"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Aeroporto de Partida</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Ex: GRU" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={addFlightForm.control}
+                        name="arrivalAirport"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Aeroporto de Chegada</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Ex: SDU" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={addFlightForm.control}
+                        name="departureTime"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Partida</FormLabel>
+                            <FormControl>
+                              <Input type="datetime-local" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={addFlightForm.control}
+                        name="arrivalTime"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Chegada</FormLabel>
+                            <FormControl>
+                              <Input type="datetime-local" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={addFlightForm.control}
+                        name="seat"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Assento</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Ex: 12A" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={addFlightForm.control}
+                        name="gate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Portão</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Ex: B15" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={addFlightForm.control}
+                      name="confirmationCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Código de Confirmação</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Ex: ABC123" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex justify-end space-x-2">
+                      <Button type="button" variant="outline" onClick={() => setShowAddFlight(false)}>
+                        Cancelar
+                      </Button>
+                      <Button type="submit" disabled={addFlightMutation.isPending}>
+                        {addFlightMutation.isPending ? "Adicionando..." : "Adicionar"}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* Flight Cards */}
@@ -86,7 +332,10 @@ export function FlightDetails({ onNavigate }: FlightDetailsProps) {
                   <Plane className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-white mb-2">Nenhum voo adicionado</h3>
                   <p className="text-white/80 mb-4">Adicione seus voos para ver informações detalhadas do aeroporto</p>
-                  <Button className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white">
+                  <Button 
+                    className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white"
+                    onClick={() => setShowAddFlight(true)}
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Adicionar Primeiro Voo
                   </Button>

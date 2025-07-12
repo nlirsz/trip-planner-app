@@ -63,6 +63,36 @@ export function Expenses({ onNavigate }: ExpensesProps) {
     enabled: !!selectedTrip,
   });
 
+  // Mutation para adicionar gasto
+  const addExpenseMutation = useMutation({
+    mutationFn: async (expenseData: any) => {
+      return apiRequest("/api/expenses", {
+        method: "POST",
+        body: {
+          ...expenseData,
+          tripId: selectedTrip,
+          amount: parseFloat(expenseData.amount),
+          date: new Date(expenseData.date).toISOString(),
+        },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trips", selectedTrip, "expenses"] });
+      setNewExpense({ amount: "", category: "", description: "", date: "" });
+      toast({
+        title: "Gasto adicionado",
+        description: "Gasto registrado com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao adicionar gasto",
+        description: "Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Buscar gastos da Wise
   const loadWiseExpenses = async (tripId: number) => {
     if (!isWiseConfigured()) {
@@ -114,35 +144,7 @@ export function Expenses({ onNavigate }: ExpensesProps) {
     }
   };
 
-  // Adicionar gasto manual
-  const addExpenseMutation = useMutation({
-    mutationFn: async (expenseData: any) => {
-      return apiRequest("/api/expenses", {
-        method: "POST",
-        body: JSON.stringify({
-          ...expenseData,
-          tripId: selectedTrip,
-          amount: parseFloat(expenseData.amount),
-          date: new Date(expenseData.date),
-        }),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/trips", selectedTrip, "expenses"] });
-      setNewExpense({ amount: "", category: "", description: "", date: "" });
-      toast({
-        title: "Gasto adicionado",
-        description: "Gasto registrado com sucesso.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Erro ao adicionar gasto",
-        description: "Tente novamente.",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   const handleAddExpense = () => {
     if (!selectedTrip || !newExpense.amount || !newExpense.category || !newExpense.description) {

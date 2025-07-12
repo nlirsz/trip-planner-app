@@ -1,10 +1,20 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { GlassCard } from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Calendar as CalendarIcon, MapPin, Clock, Utensils, Camera, Mountain, Plus, Sparkles, ChevronRight } from "lucide-react";
 import { format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -13,10 +23,26 @@ interface ItineraryProps {
   onNavigate: (section: string) => void;
 }
 
+const addActivitySchema = z.object({
+  time: z.string().min(1, "Horário é obrigatório"),
+  activity: z.string().min(1, "Atividade é obrigatória"),
+  location: z.string().optional(),
+  category: z.string().optional(),
+  duration: z.string().optional(),
+  notes: z.string().optional(),
+  estimatedCost: z.string().optional(),
+});
+
+type AddActivityForm = z.infer<typeof addActivitySchema>;
+
 export function Itinerary({ onNavigate }: ItineraryProps) {
   const [selectedTrip, setSelectedTrip] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
+  const [showAddActivity, setShowAddActivity] = useState(false);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: trips = [], isLoading } = useQuery({
     queryKey: ["/api/trips"],
@@ -24,9 +50,118 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
   });
 
   const { data: itineraryItems = [] } = useQuery({
-    queryKey: ["/api/itinerary", selectedTrip],
+    queryKey: ["/api/trips", selectedTrip, "itinerary"],
     enabled: !!selectedTrip,
   });
+
+  const addActivityForm = useForm<AddActivityForm>({
+    resolver: zodResolver(addActivitySchema),
+    defaultValues: {
+      time: "",
+      activity: "",
+      location: "",
+      category: "",
+      duration: "",
+      notes: "",
+      estimatedCost: "",
+    },
+  });
+
+  const addActivityMutation = useMutation({
+    mutationFn: async (data: AddActivityForm) => {
+      if (!selectedTrip || !selectedDate) return;
+      
+      return apiRequest("/api/itinerary", {
+        method: "POST",
+        body: {
+          ...data,
+          tripId: selectedTrip,
+          date: selectedDate.toISOString(),
+          city: selectedTripData?.destination || "",
+        },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trips", selectedTrip, "itinerary"] });
+      setShowAddActivity(false);
+      addActivityForm.reset();
+      toast({
+        title: "Atividade adicionada!",
+        description: "A atividade foi adicionada ao seu cronograma.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao adicionar atividade",
+        description: "Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const generateAIMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedTrip || !selectedTripData) return;
+      
+      return apiRequest("/api/ai/generate-trip", {
+        method: "POST",
+        body: {
+          destination: selectedTripData.destination,
+          startDate: selectedTripData.startDate,
+          endDate: selectedTripData.endDate,
+          budget: selectedTripData.budget,
+          travelStyle: selectedTripData.travelStyle,
+          preferences: selectedTripData.preferences,
+        },
+      });
+    },
+    onSuccess: async (data) => {
+      if (data?.itinerary) {
+        // Adicionar cada item do itinerário gerado
+        for (const day of data.itinerary) {
+          for (const activity of day.activities) {
+            await apiRequest("/api/itinerary", {
+              method: "POST",
+              body: {
+                tripId: selectedTrip,
+                date: day.date,
+                city: day.city,
+                time: activity.time,
+                activity: activity.activity,
+                location: activity.location,
+                notes: activity.notes,
+                category: "attraction",
+                duration: "1-2 horas",
+                estimatedCost: "R$ 0-50",
+              },
+            });
+          }
+        }
+        
+        queryClient.invalidateQueries({ queryKey: ["/api/trips", selectedTrip, "itinerary"] });
+        toast({
+          title: "Cronograma gerado com sucesso!",
+          description: "A IA criou um cronograma completo para sua viagem.",
+        });
+      }
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao gerar cronograma",
+        description: "Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleGenerateAI = () => {
+    setIsGeneratingAI(true);
+    generateAIMutation.mutate();
+  };
+
+  const handleAddActivity = (data: AddActivityForm) => {
+    addActivityMutation.mutate(data);
+  };
 
   const selectedTripData = trips.find((trip: any) => trip.id === selectedTrip);
   
@@ -159,13 +294,141 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
                     <p className="text-white/80">Cidade: {selectedTripData?.destination}</p>
                   </div>
                   <div className="flex space-x-2">
-                    <Button size="sm" variant="outline">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar Atividade
-                    </Button>
-                    <Button size="sm" className="bg-[#F093FB] hover:bg-[#F093FB]/90">
+                    <Dialog open={showAddActivity} onOpenChange={setShowAddActivity}>
+                      <DialogTrigger asChild>
+                        <Button size="sm" variant="outline">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Adicionar Atividade
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>Adicionar Atividade</DialogTitle>
+                        </DialogHeader>
+                        <Form {...addActivityForm}>
+                          <form onSubmit={addActivityForm.handleSubmit(handleAddActivity)} className="space-y-4">
+                            <FormField
+                              control={addActivityForm.control}
+                              name="time"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Horário</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Ex: 14:00" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={addActivityForm.control}
+                              name="activity"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Atividade</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Ex: Visitar museu" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={addActivityForm.control}
+                              name="location"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Local</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Ex: Museu do Louvre" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={addActivityForm.control}
+                              name="category"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Categoria</FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Selecione uma categoria" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="food">Alimentação</SelectItem>
+                                      <SelectItem value="attraction">Atração</SelectItem>
+                                      <SelectItem value="adventure">Aventura</SelectItem>
+                                      <SelectItem value="transport">Transporte</SelectItem>
+                                      <SelectItem value="accommodation">Hospedagem</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={addActivityForm.control}
+                              name="duration"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Duração</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Ex: 2 horas" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={addActivityForm.control}
+                              name="estimatedCost"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Custo Estimado</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Ex: R$ 50" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={addActivityForm.control}
+                              name="notes"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Observações</FormLabel>
+                                  <FormControl>
+                                    <Textarea placeholder="Notas adicionais..." {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <div className="flex justify-end space-x-2">
+                              <Button type="button" variant="outline" onClick={() => setShowAddActivity(false)}>
+                                Cancelar
+                              </Button>
+                              <Button type="submit" disabled={addActivityMutation.isPending}>
+                                {addActivityMutation.isPending ? "Adicionando..." : "Adicionar"}
+                              </Button>
+                            </div>
+                          </form>
+                        </Form>
+                      </DialogContent>
+                    </Dialog>
+                    <Button 
+                      size="sm" 
+                      className="bg-[#F093FB] hover:bg-[#F093FB]/90"
+                      onClick={handleGenerateAI}
+                      disabled={generateAIMutation.isPending}
+                    >
                       <Sparkles className="w-4 h-4 mr-2" />
-                      Gerar com IA
+                      {generateAIMutation.isPending ? "Gerando..." : "Gerar com IA"}
                     </Button>
                   </div>
                 </div>
@@ -175,9 +438,13 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
                     <CalendarIcon className="w-16 h-16 text-white/40 mx-auto mb-4" />
                     <h4 className="text-lg font-semibold text-white mb-2">Nenhuma atividade programada</h4>
                     <p className="text-white/70 mb-4">Adicione atividades ou deixe a IA criar um cronograma perfeito para você</p>
-                    <Button className="bg-[#F093FB] hover:bg-[#F093FB]/90 text-white">
+                    <Button 
+                      className="bg-[#F093FB] hover:bg-[#F093FB]/90 text-white"
+                      onClick={handleGenerateAI}
+                      disabled={generateAIMutation.isPending}
+                    >
                       <Sparkles className="w-4 h-4 mr-2" />
-                      Gerar Cronograma com IA
+                      {generateAIMutation.isPending ? "Gerando Cronograma..." : "Gerar Cronograma com IA"}
                     </Button>
                   </div>
                 ) : (
