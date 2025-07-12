@@ -177,56 +177,56 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <div className="w-12 h-12 bg-[#667EEA]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
               <List className="w-6 h-6 text-[#667EEA]" />
             </div>
-            <h4 className="font-semibold text-[#1A202C] text-sm">Viagens</h4>
+            <h4 className="font-semibold text-white text-sm">Viagens</h4>
           </GlassCard>
           
           <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("flight-details")}>
             <div className="w-12 h-12 bg-[#667EEA]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
               <Plane className="w-6 h-6 text-[#667EEA]" />
             </div>
-            <h4 className="font-semibold text-[#1A202C] text-sm">Voos</h4>
+            <h4 className="font-semibold text-white text-sm">Voos</h4>
           </GlassCard>
           
           <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("accommodations")}>
             <div className="w-12 h-12 bg-[#48BB78]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
               <MapPin className="w-6 h-6 text-[#48BB78]" />
             </div>
-            <h4 className="font-semibold text-[#1A202C] text-sm">Hotéis</h4>
+            <h4 className="font-semibold text-white text-sm">Hotéis</h4>
           </GlassCard>
           
           <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("itinerary")}>
             <div className="w-12 h-12 bg-[#ED8936]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
               <Calendar className="w-6 h-6 text-[#ED8936]" />
             </div>
-            <h4 className="font-semibold text-[#1A202C] text-sm">Roteiro</h4>
+            <h4 className="font-semibold text-white text-sm">Roteiro</h4>
           </GlassCard>
           
           <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("packing")}>
             <div className="w-12 h-12 bg-[#9F7AEA]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
               <CheckSquare className="w-6 h-6 text-[#9F7AEA]" />
             </div>
-            <h4 className="font-semibold text-[#1A202C] text-sm">Mala</h4>
+            <h4 className="font-semibold text-white text-sm">Mala</h4>
           </GlassCard>
           
           <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("expenses")}>
             <div className="w-12 h-12 bg-[#48BB78]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
               <DollarSign className="w-6 h-6 text-[#48BB78]" />
             </div>
-            <h4 className="font-semibold text-[#1A202C] text-sm">Gastos</h4>
+            <h4 className="font-semibold text-white text-sm">Gastos</h4>
           </GlassCard>
           
           <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("travel-docs")}>
             <div className="w-12 h-12 bg-[#ED8936]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
               <FileText className="w-6 h-6 text-[#ED8936]" />
             </div>
-            <h4 className="font-semibold text-[#1A202C] text-sm">Documentos</h4>
+            <h4 className="font-semibold text-white text-sm">Documentos</h4>
           </GlassCard>
           
           <GlassCard hover className="p-4 cursor-pointer text-center" onClick={() => onNavigate("create-trip")}>
             <div className="w-12 h-12 bg-[#F093FB]/20 rounded-xl flex items-center justify-center mx-auto mb-3">
               <Plus className="w-6 h-6 text-[#F093FB]" />
             </div>
-            <h4 className="font-semibold text-[#1A202C] text-sm">Nova Viagem</h4>
+            <h4 className="font-semibold text-white text-sm">Nova Viagem</h4>
           </GlassCard>
         </div>
       </div>
@@ -239,8 +239,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <div className="flex items-center space-x-3">
               <AlertTriangle className="w-5 h-5 text-yellow-600" />
               <div>
-                <h4 className="font-semibold text-[#1A202C]">Documento Vencendo</h4>
-                <p className="text-sm text-[#1A202C]/60">Seu passaporte vence em 3 meses. Considere renovar antes da viagem.</p>
+                <h4 className="font-semibold text-white">Documento Vencendo</h4>
+                <p className="text-sm text-white/80">Seu passaporte vence em 3 meses. Considere renovar antes da viagem.</p>
               </div>
             </div>
           </GlassCard>
@@ -249,8 +249,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
             <div className="flex items-center space-x-3">
               <Sparkles className="w-5 h-5 text-green-600" />
               <div>
-                <h4 className="font-semibold text-[#1A202C]">Sugestão da IA</h4>
-                <p className="text-sm text-[#1A202C]/60">Novos hotéis recomendados para São Paulo com base no seu perfil.</p>
+                <h4 className="font-semibold text-white">Sugestão da IA</h4>
+                <p className="text-sm text-white/80">Novos hotéis recomendados para São Paulo com base no seu perfil.</p>
               </div>
             </div>
           </GlassCard>
@@ -267,8 +267,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 <Plus className="w-5 h-5 text-[#667EEA]" />
               </div>
               <div>
-                <p className="font-semibold text-[#1A202C]">Viagem criada</p>
-                <p className="text-sm text-[#1A202C]/60">Escapada para São Paulo • hoje</p>
+                <p className="font-semibold text-white">Viagem criada</p>
+                <p className="text-sm text-white/80">Escapada para São Paulo • hoje</p>
               </div>
             </div>
             
@@ -277,8 +277,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 <CheckSquare className="w-5 h-5 text-[#48BB78]" />
               </div>
               <div>
-                <p className="font-semibold text-[#1A202C]">Checklist atualizado</p>
-                <p className="text-sm text-[#1A202C]/60">5 itens marcados como prontos • 2 horas atrás</p>
+                <p className="font-semibold text-white">Checklist atualizado</p>
+                <p className="text-sm text-white/80">5 itens marcados como prontos • 2 horas atrás</p>
               </div>
             </div>
             
@@ -287,8 +287,8 @@ export function Dashboard({ onNavigate }: DashboardProps) {
                 <Sparkles className="w-5 h-5 text-[#F093FB]" />
               </div>
               <div>
-                <p className="font-semibold text-[#1A202C]">IA gerou sugestões</p>
-                <p className="text-sm text-[#1A202C]/60">Roteiro personalizado criado • ontem</p>
+                <p className="font-semibold text-white">IA gerou sugestões</p>
+                <p className="text-sm text-white/80">Roteiro personalizado criado • ontem</p>
               </div>
             </div>
           </div>

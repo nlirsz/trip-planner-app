@@ -231,7 +231,7 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
                 className={`p-4 rounded-lg border-2 transition-all ${
                   selectedTrip === trip.id
                     ? "border-[#667EEA] bg-[#667EEA]/10"
-                    : "border-gray-200 hover:border-[#667EEA]/50"
+                    : "border-white/20 hover:border-[#667EEA]/50"
                 }`}
               >
                 <div className="text-left">

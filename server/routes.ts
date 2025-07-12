@@ -153,50 +153,7 @@ Please provide a JSON response with the following structure:
 }`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-pro",
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "object",
-            properties: {
-              itinerary: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    day: { type: "number" },
-                    date: { type: "string" },
-                    city: { type: "string" },
-                    activities: {
-                      type: "array",
-                      items: {
-                        type: "object",
-                        properties: {
-                          time: { type: "string" },
-                          activity: { type: "string" },
-                          location: { type: "string" },
-                          notes: { type: "string" }
-                        },
-                        required: ["time", "activity", "location"]
-                      }
-                    }
-                  },
-                  required: ["day", "date", "city", "activities"]
-                }
-              },
-              packingList: {
-                type: "object",
-                properties: {
-                  clothing: { type: "array", items: { type: "string" } },
-                  electronics: { type: "array", items: { type: "string" } },
-                  documents: { type: "array", items: { type: "string" } },
-                  health: { type: "array", items: { type: "string" } }
-                }
-              }
-            },
-            required: ["itinerary", "packingList"]
-          }
-        },
+        model: "gemini-2.5-flash",
         contents: prompt,
       });
 

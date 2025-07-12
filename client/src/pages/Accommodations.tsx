@@ -115,23 +115,27 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
     mutationFn: async () => {
       if (!selectedTrip || !selectedTripData) return;
       
-      return apiRequest("/api/ai/hotel-suggestions", {
+      return apiRequest("/api/accommodations/suggestions", {
         method: "POST",
         body: {
           destination: selectedTripData.destination,
+          checkIn: selectedTripData.startDate,
+          checkOut: selectedTripData.endDate,
           budget: selectedTripData.budget,
           preferences: selectedTripData.preferences,
         },
       });
     },
-    onSuccess: (data) => {
-      if (data?.hotels) {
-        setAiSuggestions(data.hotels);
+    onSuccess: async (response) => {
+      const data = await response.json();
+      if (data?.suggestions) {
+        setAiSuggestions(data.suggestions);
         toast({
           title: "Sugestões geradas!",
           description: "A IA encontrou ótimas opções de hospedagem para você.",
         });
       }
+      setIsGeneratingSuggestions(false);
     },
     onError: () => {
       toast({
@@ -139,6 +143,7 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
         description: "Tente novamente mais tarde.",
         variant: "destructive",
       });
+      setIsGeneratingSuggestions(false);
     },
   });
 
