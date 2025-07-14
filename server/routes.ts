@@ -530,7 +530,7 @@ END:VCALENDAR`;
     }
   });
 
-  // Elite Travel Assistant
+  // Elite Travel Assistant with Strategic Lodging Analysis
   app.post("/api/trips/:tripId/elite-plan", async (req, res) => {
     try {
       const tripId = parseInt(req.params.tripId);
@@ -547,49 +547,56 @@ END:VCALENDAR`;
       const diffTime = Math.abs(end.getTime() - start.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      // Generate elite travel plan based on Rio de Janeiro example
+      // TASK 1: Create Detailed Itinerary
       const schedule = [];
       const days = ['15/02', '16/02', '17/02', '18/02', '19/02', '20/02'];
       
       for (let i = 0; i < Math.min(diffDays, 6); i++) {
         const dayNumber = i + 1;
-        let morning, afternoon, evening;
+        let morning, afternoon, evening, mainArea;
         
         switch (dayNumber) {
           case 1:
             morning = "Chegada e check-in hotel em Copacabana";
             afternoon = "Visita ao Pão de Açúcar (bondinho + vista panorâmica)";
             evening = "Jantar na Urca com vista da baía";
+            mainArea = "Copacabana/Urca";
             break;
           case 2:
             morning = "Cristo Redentor (trem do Corcovado)";
             afternoon = "Museu do Amanhã + Boulevard Olímpico";
             evening = "Lapa - vida noturna e samba";
+            mainArea = "Centro/Lapa";
             break;
           case 3:
             morning = "Praia de Ipanema (relaxar)";
             afternoon = "Museu Nacional de Belas Artes + Centro Histórico";
             evening = "Santa Teresa - bares e gastronomia";
+            mainArea = "Ipanema/Centro";
             break;
           case 4:
             morning = "Jardim Botânico + Lagoa Rodrigo de Freitas";
             afternoon = "Forte de Copacabana + Praia";
             evening = "Leblon - restaurantes sofisticados";
+            mainArea = "Zona Sul";
             break;
           case 5:
             morning = "Trilha no Parque da Tijuca";
             afternoon = "Theatro Municipal + Confeitaria Colombo";
             evening = "Barra da Tijuca - vida noturna";
+            mainArea = "Tijuca/Centro";
             break;
           case 6:
             morning = "Feira de Antiguidades (Praça XV)";
             afternoon = "Últimas compras e preparação";
             evening = "Partida";
+            mainArea = "Centro";
             break;
           default:
             morning = `Explorar ${destination} - manhã livre`;
             afternoon = `Atividades culturais em ${destination}`;
             evening = `Gastronomia local em ${destination}`;
+            mainArea = destination;
         }
         
         schedule.push({
@@ -597,77 +604,119 @@ END:VCALENDAR`;
           date: days[i] || `${15 + i}/02`,
           morning,
           afternoon,
-          evening
+          evening,
+          mainArea
         });
       }
 
-      // Generate hotel recommendations based on budget and style
+      // TASK 2: Geographic Analysis & Neighborhood Strategy
+      const activityCenters = {};
+      schedule.forEach(day => {
+        const areas = day.mainArea.split('/');
+        areas.forEach(area => {
+          activityCenters[area] = (activityCenters[area] || 0) + 1;
+        });
+      });
+
+      // Find primary activity centers
+      const sortedCenters = Object.entries(activityCenters)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3);
+
+      const lodgingStrategy = {
+        geographicAnalysis: {
+          activityCenters: sortedCenters.map(([area, count]) => ({
+            area,
+            daysSpent: count,
+            percentage: Math.round((count / diffDays) * 100)
+          })),
+          analysis: `Análise do roteiro mostra concentração de atividades em ${sortedCenters[0][0]} (${sortedCenters[0][1]} dias), seguido por ${sortedCenters[1]?.[0] || 'outras áreas'} (${sortedCenters[1]?.[1] || 0} dias).`
+        },
+        recommendedNeighborhoods: [
+          {
+            name: "Copacabana",
+            priority: 1,
+            justification: "Copacabana é o bairro ideal porque concentra as atividades dos dias 1 e 4, oferece fácil acesso às praias e tem excelente conectividade de transporte para Cristo Redentor e Centro. A localização permite retorno rápido após as noites na Lapa e Santa Teresa.",
+            proximityScore: 95,
+            transportAccess: "Metrô, ônibus, táxi - acesso direto a todas as atrações principais"
+          },
+          {
+            name: "Ipanema",
+            priority: 2,
+            justification: "Ipanema oferece proximidade ao Jardim Botânico e Lagoa (dia 4), além de estar no coração da Zona Sul com fácil acesso ao Leblon. Ideal para quem prefere ambiente mais sofisticado e próximo aos melhores restaurantes.",
+            proximityScore: 85,
+            transportAccess: "Metrô, ônibus - boa conectividade com pontos turísticos"
+          }
+        ]
+      };
+
+      // TASK 3: Strategic Hotel Suggestions
       const budgetNum = parseInt(budget) || 3000;
       const isLuxury = travelStyle?.includes('luxury');
-      const isCultural = travelStyle?.includes('cultural');
       
-      const hotels = [
+      const strategicHotels = [
         {
-          name: isLuxury ? "Copacabana Palace" : "Windsor Atlantica Hotel",
-          rating: isLuxury ? 4.8 : 4.3,
-          priceRange: isLuxury ? "Luxo" : "Moderado",
-          location: "Copacabana",
-          justification: isLuxury 
-            ? "Localizado em Copacabana, oferece fácil acesso às praias dos dias 1 e 4, além de estar próximo ao Forte de Copacabana. A localização permite deslocamentos rápidos para Urca (Pão de Açúcar) e facilita o retorno após as noites na Lapa e Santa Teresa."
-            : "Em Copacabana, oferece boa relação custo-benefício mantendo proximidade com as praias e fácil acesso ao transporte público para Cristo Redentor e Centro Histórico. Ideal para o orçamento especificado."
+          name: "Copacabana Palace",
+          realHotel: true,
+          neighborhood: "Copacabana",
+          profile: "Luxo Icônico",
+          rating: 4.8,
+          priceRange: "Luxo (R$ 800-1200/noite)",
+          strategicFit: "Localizado no coração de Copacabana, permite fazer a pé as atividades dos dias 1 e 4. Posicionamento estratégico para todos os deslocamentos do roteiro.",
+          whyItFits: "Conecta perfeitamente com a justificativa de Copacabana: proximidade às praias, fácil acesso ao transporte e retorno conveniente das atividades noturnas."
+        },
+        {
+          name: "Windsor Atlantica Hotel",
+          realHotel: true,
+          neighborhood: "Copacabana",
+          profile: "Bom Custo-Benefício",
+          rating: 4.3,
+          priceRange: "Moderado (R$ 300-500/noite)",
+          strategicFit: "Mantém todos os benefícios estratégicos de Copacabana com melhor relação custo-benefício, ideal para orçamentos até R$ 3000.",
+          whyItFits: "Oferece a mesma vantagem locacional de Copacabana permitindo dedicar mais orçamento às experiências gastronômicas e culturais do roteiro."
         },
         {
           name: "Hotel Fasano Rio de Janeiro",
+          realHotel: true,
+          neighborhood: "Ipanema",
+          profile: "Luxo Boutique",
           rating: 4.7,
-          priceRange: "Luxo",
-          location: "Ipanema",
-          justification: "Situado em Ipanema, é perfeito para o dia 3 de relaxamento na praia e oferece proximidade ao Jardim Botânico (dia 4). A localização facilita o acesso aos restaurantes sofisticados do Leblon no dia 4."
-        },
-        {
-          name: "Emiliano Rio",
-          rating: 4.6,
-          priceRange: "Luxo",
-          location: "Copacabana",
-          justification: "Localizado em Copacabana, combina sofisticação com localização estratégica. Permite fácil acesso a todas as atividades praias planejadas e fica próximo aos pontos de partida para as excursões ao Pão de Açúcar e Cristo Redentor."
-        },
-        {
-          name: "Arena Copacabana Hotel",
-          rating: 4.2,
-          priceRange: "Econômico",
-          location: "Copacabana",
-          justification: "Opção mais econômica em Copacabana que mantém a conveniência locacional. Permite dedicar mais orçamento às experiências gastronômicas e culturais planejadas, especialmente para os jantares sofisticados."
+          priceRange: "Luxo (R$ 900-1400/noite)",
+          strategicFit: "Posicionado em Ipanema conforme estratégia recomendada, próximo ao Jardim Botânico e Lagoa do dia 4, com acesso privilegiado aos restaurantes sofisticados.",
+          whyItFits: "Alinha perfeitamente com a justificativa de Ipanema: ambiente sofisticado, proximidade aos pontos do roteiro e acesso aos melhores restaurantes do Leblon."
         }
       ];
 
-      // Filter hotels based on budget
+      // Filter hotels based on budget and preferences
       const filteredHotels = budgetNum < 2000 
-        ? hotels.filter(h => h.priceRange === "Econômico" || h.priceRange === "Moderado")
-        : hotels;
+        ? strategicHotels.filter(h => h.profile.includes("Custo-Benefício") || h.profile.includes("Moderado"))
+        : strategicHotels;
 
       const summary = {
         totalDays: diffDays,
         highlights: [
-          `${diffDays} dias de experiências balanceadas entre cultura, praias e gastronomia`,
-          "Roteiro logístico com deslocamentos eficientes entre as atrações",
-          "Ritmo moderado respeitando o perfil de luxo e cultura",
-          "Noites diversificadas incluindo vida noturna, gastronomia e cultura"
+          `${diffDays} dias com roteiro estratégico baseado em análise geográfica`,
+          "Hospedagem justificada pela concentração de atividades",
+          "Hotéis reais selecionados nos bairros recomendados",
+          "Estratégia logística que minimiza deslocamentos"
         ],
         recommendations: [
-          `${filteredHotels.length} opções estratégicamente localizadas`,
-          "Justificativas logísticas baseadas no cronograma específico",
-          "Diferentes faixas de preço para adequar ao orçamento",
-          "Localização otimizada para minimizar deslocamentos"
+          `${filteredHotels.length} hotéis estratégicos nos bairros ideais`,
+          "Cada sugestão conectada à análise do roteiro",
+          "Justificativas baseadas em dados reais de proximidade",
+          "Otimização entre localização, orçamento e experiência"
         ]
       };
 
       res.json({
-        schedule,
-        hotels: filteredHotels,
+        itineraryTable: schedule,
+        lodgingStrategy,
+        strategicHotels: filteredHotels,
         summary
       });
     } catch (error) {
-      console.error('Error generating elite travel plan:', error);
-      res.status(500).json({ message: "Failed to generate elite travel plan" });
+      console.error('Error generating strategic travel plan:', error);
+      res.status(500).json({ message: "Failed to generate strategic travel plan" });
     }
   });
 

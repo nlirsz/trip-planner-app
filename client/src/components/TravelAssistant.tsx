@@ -23,6 +23,7 @@ interface DaySchedule {
   morning: string;
   afternoon: string;
   evening: string;
+  mainArea: string;
 }
 
 interface HotelRecommendation {
@@ -34,8 +35,34 @@ interface HotelRecommendation {
 }
 
 interface AssistantResponse {
-  schedule: DaySchedule[];
-  hotels: HotelRecommendation[];
+  itineraryTable: DaySchedule[];
+  lodgingStrategy: {
+    geographicAnalysis: {
+      activityCenters: Array<{
+        area: string;
+        daysSpent: number;
+        percentage: number;
+      }>;
+      analysis: string;
+    };
+    recommendedNeighborhoods: Array<{
+      name: string;
+      priority: number;
+      justification: string;
+      proximityScore: number;
+      transportAccess: string;
+    }>;
+  };
+  strategicHotels: Array<{
+    name: string;
+    realHotel: boolean;
+    neighborhood: string;
+    profile: string;
+    rating: number;
+    priceRange: string;
+    strategicFit: string;
+    whyItFits: string;
+  }>;
   summary: {
     totalDays: number;
     highlights: string[];
@@ -97,7 +124,7 @@ export function TravelAssistant({ trip, onNavigate }: TravelAssistantProps) {
   });
 
   const renderScheduleTable = () => {
-    if (!assistantResponse?.schedule) return null;
+    if (!assistantResponse?.itineraryTable) return null;
 
     return (
       <div className="overflow-x-auto">
@@ -109,16 +136,18 @@ export function TravelAssistant({ trip, onNavigate }: TravelAssistantProps) {
               <th className="text-left p-4 text-white/90">Manhã (09:00-12:00)</th>
               <th className="text-left p-4 text-white/90">Tarde (14:00-17:00)</th>
               <th className="text-left p-4 text-white/90">Noite (19:00-22:00)</th>
+              <th className="text-left p-4 text-white/90">Área Principal</th>
             </tr>
           </thead>
           <tbody>
-            {assistantResponse.schedule.map((day, index) => (
+            {assistantResponse.itineraryTable.map((day, index) => (
               <tr key={index} className="border-b border-white/10">
                 <td className="p-4 text-white/80 font-medium">Dia {day.day}</td>
                 <td className="p-4 text-white/80">{day.date}</td>
                 <td className="p-4 text-white/70">{day.morning}</td>
                 <td className="p-4 text-white/70">{day.afternoon}</td>
                 <td className="p-4 text-white/70">{day.evening}</td>
+                <td className="p-4 text-white/60 text-sm">{day.mainArea}</td>
               </tr>
             ))}
           </tbody>
@@ -127,30 +156,97 @@ export function TravelAssistant({ trip, onNavigate }: TravelAssistantProps) {
     );
   };
 
-  const renderHotelRecommendations = () => {
-    if (!assistantResponse?.hotels) return null;
+  const renderStrategicAnalysis = () => {
+    if (!assistantResponse?.lodgingStrategy) return null;
+
+    const { geographicAnalysis, recommendedNeighborhoods } = assistantResponse.lodgingStrategy;
+
+    return (
+      <div className="space-y-6">
+        {/* Geographic Analysis */}
+        <div>
+          <h3 className="text-lg font-semibold text-white mb-3">Análise Geográfica do Roteiro</h3>
+          <GlassCard className="p-4 mb-4">
+            <p className="text-white/80 mb-4">{geographicAnalysis.analysis}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {geographicAnalysis.activityCenters.map((center, index) => (
+                <div key={index} className="text-center">
+                  <div className="text-2xl font-bold text-white">{center.daysSpent}</div>
+                  <div className="text-sm text-white/70">{center.area}</div>
+                  <div className="text-xs text-white/60">{center.percentage}% do tempo</div>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+        </div>
+
+        {/* Recommended Neighborhoods */}
+        <div>
+          <h3 className="text-lg font-semibold text-white mb-3">Bairros Recomendados</h3>
+          <div className="space-y-4">
+            {recommendedNeighborhoods.map((neighborhood, index) => (
+              <GlassCard key={index} className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="text-lg font-medium text-white">{neighborhood.name}</h4>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      Prioridade {neighborhood.priority}
+                    </Badge>
+                    <span className="text-sm text-white/80">{neighborhood.proximityScore}%</span>
+                  </div>
+                </div>
+                <p className="text-white/70 text-sm mb-3 leading-relaxed">
+                  {neighborhood.justification}
+                </p>
+                <div className="flex items-center gap-2 text-xs text-white/60">
+                  <MapPin className="w-3 h-3" />
+                  <span>{neighborhood.transportAccess}</span>
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderStrategicHotels = () => {
+    if (!assistantResponse?.strategicHotels) return null;
 
     return (
       <div className="grid gap-4">
-        {assistantResponse.hotels.map((hotel, index) => (
+        {assistantResponse.strategicHotels.map((hotel, index) => (
           <GlassCard key={index} className="p-4">
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-lg font-semibold text-white">{hotel.name}</h3>
               <div className="flex items-center gap-2">
+                {hotel.realHotel && (
+                  <Badge variant="outline" className="text-xs bg-green-500/20 text-green-300">
+                    Hotel Real
+                  </Badge>
+                )}
                 <Star className="w-4 h-4 text-yellow-400 fill-current" />
                 <span className="text-white/80">{hotel.rating}/5</span>
               </div>
             </div>
             <div className="flex items-center gap-2 mb-2">
               <MapPin className="w-4 h-4 text-white/60" />
-              <span className="text-white/80">{hotel.location}</span>
+              <span className="text-white/80">{hotel.neighborhood}</span>
               <Badge variant="outline" className="ml-auto">
-                {hotel.priceRange}
+                {hotel.profile}
               </Badge>
             </div>
-            <p className="text-white/70 text-sm leading-relaxed">
-              {hotel.justification}
-            </p>
+            <div className="text-sm text-white/70 mb-2">
+              <strong>Faixa de Preço:</strong> {hotel.priceRange}
+            </div>
+            <div className="mb-3">
+              <p className="text-white/70 text-sm leading-relaxed mb-2">
+                <strong>Estratégia:</strong> {hotel.strategicFit}
+              </p>
+              <p className="text-white/60 text-sm leading-relaxed">
+                <strong>Por que se encaixa:</strong> {hotel.whyItFits}
+              </p>
+            </div>
           </GlassCard>
         ))}
       </div>
@@ -211,9 +307,9 @@ export function TravelAssistant({ trip, onNavigate }: TravelAssistantProps) {
 
   const getTaskLabel = (task: number) => {
     switch (task) {
-      case 1: return "Criando cronograma personalizado...";
-      case 2: return "Gerando sugestões de hospedagem...";
-      case 3: return "Consolidando plano final...";
+      case 1: return "Criando cronograma detalhado...";
+      case 2: return "Analisando estratégia de hospedagem...";
+      case 3: return "Sugerindo hotéis estratégicos...";
       default: return "";
     }
   };
@@ -293,9 +389,10 @@ export function TravelAssistant({ trip, onNavigate }: TravelAssistantProps) {
 
       {assistantResponse && (
         <Tabs defaultValue="schedule" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="schedule">Cronograma</TabsTrigger>
-            <TabsTrigger value="hotels">Hospedagem</TabsTrigger>
+            <TabsTrigger value="analysis">Análise</TabsTrigger>
+            <TabsTrigger value="hotels">Hotéis</TabsTrigger>
             <TabsTrigger value="summary">Resumo</TabsTrigger>
           </TabsList>
 
@@ -313,16 +410,30 @@ export function TravelAssistant({ trip, onNavigate }: TravelAssistantProps) {
             </GlassCard>
           </TabsContent>
 
-          <TabsContent value="hotels">
+          <TabsContent value="analysis">
             <GlassCard className="p-6">
               <CardHeader className="px-0 pt-0">
-                <CardTitle className="text-white">Hospedagem Estratégica</CardTitle>
+                <CardTitle className="text-white">Análise Estratégica</CardTitle>
                 <CardDescription className="text-white/60">
-                  Hotéis selecionados com base no seu cronograma
+                  Análise geográfica e recomendação de bairros
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-0 pb-0">
-                {renderHotelRecommendations()}
+                {renderStrategicAnalysis()}
+              </CardContent>
+            </GlassCard>
+          </TabsContent>
+
+          <TabsContent value="hotels">
+            <GlassCard className="p-6">
+              <CardHeader className="px-0 pt-0">
+                <CardTitle className="text-white">Hotéis Estratégicos</CardTitle>
+                <CardDescription className="text-white/60">
+                  Hotéis reais selecionados nos bairros recomendados
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-0 pb-0">
+                {renderStrategicHotels()}
               </CardContent>
             </GlassCard>
           </TabsContent>

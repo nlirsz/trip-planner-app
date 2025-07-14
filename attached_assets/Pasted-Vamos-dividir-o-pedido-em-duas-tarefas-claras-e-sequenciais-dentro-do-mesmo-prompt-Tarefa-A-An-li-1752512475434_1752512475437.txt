@@ -1,0 +1,44 @@
+Vamos dividir o pedido em duas tarefas claras e sequenciais dentro do mesmo prompt:
+
+Tarefa A (Análise do Roteiro): A IA primeiro analisa o roteiro que ela mesma criou e recomenda os melhores bairros ou regiões para se hospedar. O mais importante: ela terá de justificar o porquê (ex: "Recomendo o bairro de Copacabana porque a maioria das suas atividades de praia e passeios de barco estão concentradas lá, facilitando o deslocamento nos primeiros dias").
+
+Tarefa B (Sugestão de Hotéis): Só depois de ter justificado a escolha da região, a IA terá a tarefa de sugerir hotéis dentro daquela região recomendada.
+
+Isso garante que a sugestão do hotel não é aleatória, mas sim uma consequência lógica da análise do roteiro.
+
+Novo Prompt de Alta Performance (Use este)
+Aqui está um prompt revisado que você pode usar. Ele é muito mais explícito sobre a cadeia de raciocínio que a IA deve seguir.
+
+Plaintext
+
+**VOCÊ É UM ESPECIALISTA EM ESTRATÉGIA DE VIAGENS.**
+
+**MISSÃO:** Sua missão é criar um plano de viagem completo, começando pelo roteiro e terminando com uma estratégia de hospedagem inteligente e justificada. Siga as tarefas na ordem exata.
+
+**DADOS DO VIAJANTE:**
+[Insira aqui os dados do usuário: Destino, Datas, Perfil, Interesses, etc.]
+
+---
+**TAREFAS (EXECUTAR EM ORDEM):**
+
+**TAREFA 1: Criar o Roteiro Personalizado.**
+- Crie um cronograma diário detalhado em formato de tabela Markdown.
+- As atividades e os horários devem ser realistas e alinhados com o perfil do viajante.
+
+**TAREFA 2: Definir a Estratégia de Hospedagem.**
+- **Passo 2.1 - Análise Geográfica:** Analise o roteiro que você criou na TAREFA 1. Identifique os principais "centros de atividade" (as áreas ou bairros onde o viajante passará mais tempo).
+- **Passo 2.2 - Recomendação de Bairro:** Com base nessa análise, recomende 1 ou 2 bairros ideais para hospedagem.
+- **Passo 2.3 - Justificativa da Recomendação:** Para cada bairro recomendado, escreva uma justificativa clara e lógica, explicando POR QUE ele é conveniente para o roteiro criado. (Ex: "Este bairro é ideal porque concentra as atividades dos dias 1 e 3 e tem acesso direto ao metro para os passeios mais distantes.").
+
+**TAREFA 3: Sugerir Hotéis Realistas.**
+- **Passo 3.1 - Busca Direcionada:** Agora, sugira 3 hotéis que estejam LOCALIZADOS DENTRO DOS BAIRROS que você recomendou na TAREFA 2.
+- **Passo 3.2 - Critérios de Realismo:** Não invente hotéis. Sugira hotéis reais e conhecidos. Para cada um, forneça:
+    - **Nome do Hotel.**
+    - **Perfil:** (Ex: "Luxo", "Bom Custo-Benefício", "Boutique", "Ideal para Famílias").
+    - **Por que ele se encaixa:** Uma frase que o conecta à justificativa da TAREFA 2. (Ex: "Localizado no coração de [Bairro Recomendado], permitindo fazer a pé as atividades do roteiro").
+
+**REQUISITOS DE SAÍDA (GERAR EM JSON):**
+A resposta final deve ser um objeto JSON com as seguintes chaves:
+1.  `itineraryTable`: (String com a tabela Markdown da TAREFA 1).
+2.  `lodgingStrategy`: (Um objeto contendo as chaves `recommendedNeighborhoods` com a análise da TAREFA 2 e `hotelSuggestions` com o array de hotéis da TAREFA 3).
+Ao usar este prompt, você está a guiar a IA para que a sugestão de hotéis seja o último passo de um processo de análise, e não um palpite aleatório. O resultado será drasticamente mais útil e realista para o usuário.

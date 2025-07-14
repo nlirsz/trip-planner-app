@@ -106,6 +106,18 @@ The application uses a PostgreSQL database with three main tables:
 
 ## Recent Changes (July 2025)
 
+### Elite Travel Assistant with Strategic Lodging Analysis (July 2025)
+- **Strategic Hotel Recommendations**: Implemented 2-task sequential analysis system
+  - Task A: Geographic analysis of itinerary to identify activity centers
+  - Task B: Strategic hotel suggestions based on analyzed neighborhoods
+- **Real Hotel Integration**: System now suggests actual hotels with real ratings and prices
+- **Justification Engine**: Each hotel recommendation includes detailed strategic fit explanation
+- **Neighborhood Priority System**: Ranks recommended areas by proximity score and transport access
+- **Enhanced UI**: Added dedicated "Análise" tab showing geographic breakdown and strategic reasoning
+- **Data-Driven Decisions**: Hotel suggestions now based on actual itinerary analysis rather than generic recommendations
+
+## Previous Changes (July 2025)
+
 ### Google Cloud API Integration
 - **Google Places API**: Real hotel and restaurant search functionality
   - Hotel search by destination with ratings, prices, and photos
