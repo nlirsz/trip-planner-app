@@ -99,10 +99,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/trips/:id", async (req, res) => {
     try {
-      const trip = await storage.updateTrip(parseInt(req.params.id), req.body);
+      const tripId = parseInt(req.params.id);
+      console.log("Updating trip:", tripId, "with data:", req.body);
+      
+      // Validate the trip update data
+      const updateSchema = insertTripSchema.partial(); // Make all fields optional for updates
+      const validatedData = updateSchema.parse(req.body);
+      
+      const trip = await storage.updateTrip(tripId, validatedData);
       res.json(trip);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update trip" });
+      console.error("Trip update error:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid trip data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update trip" });
+      }
     }
   });
 

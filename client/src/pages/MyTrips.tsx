@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { GlassCard } from "@/components/GlassCard";
 import { TripCard } from "@/components/TripCard";
+import { EditTripModal } from "@/components/EditTripModal";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trip } from "@shared/schema";
@@ -14,6 +15,8 @@ interface MyTripsProps {
 
 export function MyTrips({ onNavigate, onTripSelect }: MyTripsProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   
   const { data: trips = [], isLoading } = useQuery<Trip[]>({
     queryKey: ["/api/trips"],
@@ -29,9 +32,18 @@ export function MyTrips({ onNavigate, onTripSelect }: MyTripsProps) {
   };
 
   const handleEdit = (trip: Trip) => {
-    // Store the trip data for editing and navigate to edit mode
-    localStorage.setItem('editingTrip', JSON.stringify(trip));
-    onNavigate("create-trip");
+    setEditingTrip(trip);
+    setShowEditModal(true);
+  };
+
+  const handleEditClose = () => {
+    setShowEditModal(false);
+    setEditingTrip(null);
+  };
+
+  const handleTripUpdated = (updatedTrip: Trip) => {
+    // Trip data will be automatically updated via React Query cache invalidation
+    console.log("Trip updated:", updatedTrip);
   };
 
   if (isLoading) {
@@ -115,6 +127,14 @@ export function MyTrips({ onNavigate, onTripSelect }: MyTripsProps) {
           </Button>
         </GlassCard>
       )}
+
+      {/* Edit Trip Modal */}
+      <EditTripModal
+        trip={editingTrip}
+        open={showEditModal}
+        onClose={handleEditClose}
+        onTripUpdated={handleTripUpdated}
+      />
     </div>
   );
 }
