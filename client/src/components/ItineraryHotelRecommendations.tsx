@@ -240,21 +240,61 @@ export function ItineraryHotelRecommendations({ tripId, trip }: ItineraryHotelPr
                   ))}
                 </div>
 
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${hotel.budgetMatch ? 'bg-green-400' : 'bg-yellow-400'}`}></div>
-                    <span className="text-xs text-white/70">
-                      {hotel.budgetMatch ? 'Dentro do orçamento' : 'Acima do orçamento'}
-                    </span>
+                <div className="flex flex-col gap-3">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${hotel.budgetMatch ? 'bg-green-400' : 'bg-yellow-400'}`}></div>
+                      <span className="text-xs text-white/70">
+                        {hotel.budgetMatch ? 'Dentro do orçamento' : 'Acima do orçamento'}
+                      </span>
+                    </div>
                   </div>
-                  <Button
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                    onClick={() => window.open(hotel.bookingUrl, '_blank')}
-                  >
-                    <ExternalLink className="w-4 h-4 mr-1" />
-                    Ver Detalhes
-                  </Button>
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      className="bg-blue-600 hover:bg-blue-700 text-white flex-1"
+                      onClick={() => {
+                        // Format dates for Google Hotels
+                        const checkInDate = new Date(cityRec.checkIn).toISOString().split('T')[0];
+                        const checkOutDate = new Date(cityRec.checkOut).toISOString().split('T')[0];
+                        
+                        // Create Google Hotels search URL with specific hotel and dates
+                        const googleHotelsUrl = `https://www.google.com/travel/hotels/${encodeURIComponent(cityRec.city)}?` +
+                          `q=${encodeURIComponent(hotel.name + ' ' + hotel.address)}&` +
+                          `checkin=${checkInDate}&checkout=${checkOutDate}&adults=2&` +
+                          `price_range=1-${hotel.priceLevel}&` +
+                          `sort=recommended`;
+                        
+                        console.log('Opening Google Hotels URL:', googleHotelsUrl);
+                        window.open(googleHotelsUrl, '_blank');
+                      }}
+                    >
+                      <ExternalLink className="w-4 h-4 mr-1" />
+                      Google Hotels
+                    </Button>
+                    
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="bg-white/10 border-white/20 text-white hover:bg-white/20 flex-1"
+                      onClick={() => {
+                        // Format dates for booking platforms
+                        const checkInDate = new Date(cityRec.checkIn).toISOString().split('T')[0];
+                        const checkOutDate = new Date(cityRec.checkOut).toISOString().split('T')[0];
+                        
+                        // Create Booking.com search URL
+                        const bookingUrl = `https://www.booking.com/searchresults.html?` +
+                          `ss=${encodeURIComponent(hotel.name + ' ' + cityRec.city)}&` +
+                          `checkin=${checkInDate}&checkout=${checkOutDate}&group_adults=2`;
+                        
+                        window.open(bookingUrl, '_blank');
+                      }}
+                    >
+                      <ExternalLink className="w-4 h-4 mr-1" />
+                      Booking.com
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
