@@ -26,7 +26,7 @@ interface CityHotelRecommendation {
 export function ItineraryHotelRecommendations({ tripId, trip }: ItineraryHotelProps) {
   const [selectedCity, setSelectedCity] = useState<string>('');
 
-  const { data: cityRecommendations = [], isLoading, error } = useQuery({
+  const { data: cityRecommendationsData, isLoading, error } = useQuery({
     queryKey: [`/api/trips/${tripId}/itinerary-hotels`],
     queryFn: () => apiRequest(`/api/trips/${tripId}/itinerary-hotels`, {
       method: 'POST',
@@ -38,6 +38,13 @@ export function ItineraryHotelRecommendations({ tripId, trip }: ItineraryHotelPr
       }
     }),
   });
+
+  // Ensure we have a valid array
+  const cityRecommendations = Array.isArray(cityRecommendationsData) ? cityRecommendationsData : [];
+  
+  // Debug logging
+  console.log('Itinerary Hotel Recommendations - Raw data:', cityRecommendationsData);
+  console.log('Itinerary Hotel Recommendations - Processed array:', cityRecommendations);
 
   const getAmenityIcon = (amenity: string) => {
     const iconMap: { [key: string]: JSX.Element } = {
