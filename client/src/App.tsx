@@ -17,10 +17,12 @@ import { Expenses } from "@/pages/Expenses";
 import { TravelDocs } from "@/pages/TravelDocs";
 import { Trip } from "@shared/schema";
 import { Maps } from "./pages/Maps";
+import { TravelAssistantPage } from "./pages/TravelAssistantPage";
 
 function App() {
   const [currentSection, setCurrentSection] = useState("dashboard");
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const [assistantTripId, setAssistantTripId] = useState<number | null>(null);
 
   const handleSectionChange = (section: string) => {
     setCurrentSection(section);
@@ -29,6 +31,11 @@ function App() {
 
   const handleTripSelect = (trip: Trip) => {
     setSelectedTrip(trip);
+  };
+
+  const handleAssistantTripSelect = (tripId: number) => {
+    setAssistantTripId(tripId);
+    setCurrentSection("travel-assistant");
   };
 
   const handleTripDetailsClose = () => {
@@ -40,7 +47,7 @@ function App() {
       case "dashboard":
         return <Dashboard onNavigate={handleSectionChange} />;
       case "my-trips":
-        return <MyTrips onNavigate={handleSectionChange} onTripSelect={handleTripSelect} />;
+        return <MyTrips onNavigate={handleSectionChange} onTripSelect={handleTripSelect} onEliteAssistant={handleAssistantTripSelect} />;
       case "flight-details":
         return <FlightDetails onNavigate={handleSectionChange} />;
       case "accommodations":
@@ -55,6 +62,8 @@ function App() {
         return <TravelDocs onNavigate={handleSectionChange} />;
       case "maps":
         return <Maps onNavigate={handleSectionChange} />;
+      case "travel-assistant":
+        return <TravelAssistantPage tripId={assistantTripId || undefined} onNavigate={handleSectionChange} />;
       case "create-trip":
         return <CreateTrip onNavigate={handleSectionChange} />;
       case "documents":

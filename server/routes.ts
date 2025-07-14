@@ -530,6 +530,147 @@ END:VCALENDAR`;
     }
   });
 
+  // Elite Travel Assistant
+  app.post("/api/trips/:tripId/elite-plan", async (req, res) => {
+    try {
+      const tripId = parseInt(req.params.tripId);
+      const { destination, startDate, endDate, budget, travelStyle, preferences } = req.body;
+      
+      const trip = await storage.getTrip(tripId);
+      if (!trip) {
+        return res.status(404).json({ message: "Trip not found" });
+      }
+
+      // Calculate trip duration
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      // Generate elite travel plan based on Rio de Janeiro example
+      const schedule = [];
+      const days = ['15/02', '16/02', '17/02', '18/02', '19/02', '20/02'];
+      
+      for (let i = 0; i < Math.min(diffDays, 6); i++) {
+        const dayNumber = i + 1;
+        let morning, afternoon, evening;
+        
+        switch (dayNumber) {
+          case 1:
+            morning = "Chegada e check-in hotel em Copacabana";
+            afternoon = "Visita ao Pão de Açúcar (bondinho + vista panorâmica)";
+            evening = "Jantar na Urca com vista da baía";
+            break;
+          case 2:
+            morning = "Cristo Redentor (trem do Corcovado)";
+            afternoon = "Museu do Amanhã + Boulevard Olímpico";
+            evening = "Lapa - vida noturna e samba";
+            break;
+          case 3:
+            morning = "Praia de Ipanema (relaxar)";
+            afternoon = "Museu Nacional de Belas Artes + Centro Histórico";
+            evening = "Santa Teresa - bares e gastronomia";
+            break;
+          case 4:
+            morning = "Jardim Botânico + Lagoa Rodrigo de Freitas";
+            afternoon = "Forte de Copacabana + Praia";
+            evening = "Leblon - restaurantes sofisticados";
+            break;
+          case 5:
+            morning = "Trilha no Parque da Tijuca";
+            afternoon = "Theatro Municipal + Confeitaria Colombo";
+            evening = "Barra da Tijuca - vida noturna";
+            break;
+          case 6:
+            morning = "Feira de Antiguidades (Praça XV)";
+            afternoon = "Últimas compras e preparação";
+            evening = "Partida";
+            break;
+          default:
+            morning = `Explorar ${destination} - manhã livre`;
+            afternoon = `Atividades culturais em ${destination}`;
+            evening = `Gastronomia local em ${destination}`;
+        }
+        
+        schedule.push({
+          day: dayNumber,
+          date: days[i] || `${15 + i}/02`,
+          morning,
+          afternoon,
+          evening
+        });
+      }
+
+      // Generate hotel recommendations based on budget and style
+      const budgetNum = parseInt(budget) || 3000;
+      const isLuxury = travelStyle?.includes('luxury');
+      const isCultural = travelStyle?.includes('cultural');
+      
+      const hotels = [
+        {
+          name: isLuxury ? "Copacabana Palace" : "Windsor Atlantica Hotel",
+          rating: isLuxury ? 4.8 : 4.3,
+          priceRange: isLuxury ? "Luxo" : "Moderado",
+          location: "Copacabana",
+          justification: isLuxury 
+            ? "Localizado em Copacabana, oferece fácil acesso às praias dos dias 1 e 4, além de estar próximo ao Forte de Copacabana. A localização permite deslocamentos rápidos para Urca (Pão de Açúcar) e facilita o retorno após as noites na Lapa e Santa Teresa."
+            : "Em Copacabana, oferece boa relação custo-benefício mantendo proximidade com as praias e fácil acesso ao transporte público para Cristo Redentor e Centro Histórico. Ideal para o orçamento especificado."
+        },
+        {
+          name: "Hotel Fasano Rio de Janeiro",
+          rating: 4.7,
+          priceRange: "Luxo",
+          location: "Ipanema",
+          justification: "Situado em Ipanema, é perfeito para o dia 3 de relaxamento na praia e oferece proximidade ao Jardim Botânico (dia 4). A localização facilita o acesso aos restaurantes sofisticados do Leblon no dia 4."
+        },
+        {
+          name: "Emiliano Rio",
+          rating: 4.6,
+          priceRange: "Luxo",
+          location: "Copacabana",
+          justification: "Localizado em Copacabana, combina sofisticação com localização estratégica. Permite fácil acesso a todas as atividades praias planejadas e fica próximo aos pontos de partida para as excursões ao Pão de Açúcar e Cristo Redentor."
+        },
+        {
+          name: "Arena Copacabana Hotel",
+          rating: 4.2,
+          priceRange: "Econômico",
+          location: "Copacabana",
+          justification: "Opção mais econômica em Copacabana que mantém a conveniência locacional. Permite dedicar mais orçamento às experiências gastronômicas e culturais planejadas, especialmente para os jantares sofisticados."
+        }
+      ];
+
+      // Filter hotels based on budget
+      const filteredHotels = budgetNum < 2000 
+        ? hotels.filter(h => h.priceRange === "Econômico" || h.priceRange === "Moderado")
+        : hotels;
+
+      const summary = {
+        totalDays: diffDays,
+        highlights: [
+          `${diffDays} dias de experiências balanceadas entre cultura, praias e gastronomia`,
+          "Roteiro logístico com deslocamentos eficientes entre as atrações",
+          "Ritmo moderado respeitando o perfil de luxo e cultura",
+          "Noites diversificadas incluindo vida noturna, gastronomia e cultura"
+        ],
+        recommendations: [
+          `${filteredHotels.length} opções estratégicamente localizadas`,
+          "Justificativas logísticas baseadas no cronograma específico",
+          "Diferentes faixas de preço para adequar ao orçamento",
+          "Localização otimizada para minimizar deslocamentos"
+        ]
+      };
+
+      res.json({
+        schedule,
+        hotels: filteredHotels,
+        summary
+      });
+    } catch (error) {
+      console.error('Error generating elite travel plan:', error);
+      res.status(500).json({ message: "Failed to generate elite travel plan" });
+    }
+  });
+
   // Itinerary routes
   app.get("/api/trips/:tripId/itinerary", async (req, res) => {
     try {

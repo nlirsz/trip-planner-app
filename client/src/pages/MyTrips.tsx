@@ -11,9 +11,10 @@ import { Plus } from "lucide-react";
 interface MyTripsProps {
   onNavigate: (section: string) => void;
   onTripSelect: (trip: Trip) => void;
+  onEliteAssistant?: (tripId: number) => void;
 }
 
-export function MyTrips({ onNavigate, onTripSelect }: MyTripsProps) {
+export function MyTrips({ onNavigate, onTripSelect, onEliteAssistant }: MyTripsProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -101,6 +102,7 @@ export function MyTrips({ onNavigate, onTripSelect }: MyTripsProps) {
               trip={trip}
               onViewDetails={handleViewDetails}
               onEdit={handleEdit}
+              onEliteAssistant={onEliteAssistant}
             />
           ))}
         </div>

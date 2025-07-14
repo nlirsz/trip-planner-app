@@ -1,6 +1,6 @@
 import { Trip } from "@shared/schema";
 import { GlassCard } from "./GlassCard";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Calendar, Clock, MapPin, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 
@@ -8,9 +8,10 @@ interface TripCardProps {
   trip: Trip;
   onViewDetails: (trip: Trip) => void;
   onEdit: (trip: Trip) => void;
+  onEliteAssistant?: (tripId: number) => void;
 }
 
-export function TripCard({ trip, onViewDetails, onEdit }: TripCardProps) {
+export function TripCard({ trip, onViewDetails, onEdit, onEliteAssistant }: TripCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "upcoming":
@@ -71,20 +72,31 @@ export function TripCard({ trip, onViewDetails, onEdit }: TripCardProps) {
           </div>
         )}
         
-        <div className="grid grid-cols-2 gap-3">
-          <Button 
-            onClick={() => onViewDetails(trip)}
-            className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white"
-          >
-            View Details
-          </Button>
-          <Button 
-            onClick={() => onEdit(trip)}
-            variant="outline"
-            className="border-white/30 bg-white/30 hover:bg-white/40"
-          >
-            Edit Trip
-          </Button>
+        <div className="space-y-3">
+          {onEliteAssistant && (
+            <Button 
+              onClick={() => onEliteAssistant(trip.id)}
+              className="w-full bg-gradient-to-r from-[#667EEA] to-[#764BA2] hover:from-[#667EEA]/90 hover:to-[#764BA2]/90 text-white font-medium"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Assistente Elite
+            </Button>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            <Button 
+              onClick={() => onViewDetails(trip)}
+              className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white"
+            >
+              View Details
+            </Button>
+            <Button 
+              onClick={() => onEdit(trip)}
+              variant="outline"
+              className="border-white/30 bg-white/30 hover:bg-white/40"
+            >
+              Edit Trip
+            </Button>
+          </div>
         </div>
       </div>
     </GlassCard>
