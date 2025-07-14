@@ -1,4 +1,5 @@
 import { googlePlaces, searchHotelsInDestination } from './google-places';
+import { hotelSearchService } from './hotel-search-service';
 import { apiRequest } from './queryClient';
 
 export interface HotelRecommendation {
@@ -221,65 +222,33 @@ export class HotelRecommendationEngine {
 
   async getRecommendations(criteria: RecommendationCriteria): Promise<HotelRecommendation[]> {
     try {
-      // Get real hotels from Google Places
-      const hotels = await searchHotelsInDestination(criteria.destination);
+      console.log('Getting hotel recommendations for:', criteria.destination);
+      
+      // Use the improved hotel search service
+      const hotels = await hotelSearchService.searchHotels(criteria.destination);
+      console.log('Hotels found:', hotels.length);
       
       if (hotels.length === 0) {
-        throw new Error("No hotels found for destination");
+        console.log('No hotels found - this should not happen with fallbacks');
+        return [];
       }
       
-      const budgetLevel = this.getBudgetLevel(criteria.budget);
-      
-      // Filter and score hotels
-      const scoredHotels = hotels.map(hotel => {
-        const proximityScore = this.calculateProximityScore(hotel, criteria.itineraryLocations);
-        const budgetMatch = (hotel.price_level || 2) <= budgetLevel;
-        const ratingScore = (hotel.rating || 0) * 20;
-        const reviewsScore = Math.log(hotel.user_ratings_total || 1) * 5;
-        
-        return {
-          ...hotel,
-          totalScore: proximityScore + ratingScore + reviewsScore + (budgetMatch ? 20 : 0)
-        };
+      // Convert to hotel recommendations
+      const recommendations = hotels.slice(0, 8).map(hotel => {
+        return hotelSearchService.convertToHotelRecommendation(hotel, criteria);
       });
       
-      // Sort by total score and take top results
-      const topHotels = scoredHotels
-        .sort((a, b) => b.totalScore - a.totalScore)
-        .slice(0, 8);
+      // Sort by proximity score and budget match
+      const sortedRecommendations = recommendations
+        .sort((a, b) => {
+          if (a.budgetMatch && !b.budgetMatch) return -1;
+          if (!a.budgetMatch && b.budgetMatch) return 1;
+          return b.proximityScore - a.proximityScore;
+        })
+        .slice(0, 6);
       
-      // Transform to recommendation format
-      const recommendations: HotelRecommendation[] = [];
-      
-      for (const hotel of topHotels) {
-        const proximityScore = this.calculateProximityScore(hotel, criteria.itineraryLocations);
-        const budgetMatch = (hotel.price_level || 2) <= budgetLevel;
-        const aiReason = await this.generateAIRecommendationReason(hotel, criteria);
-        const distanceToAttractions = await this.calculateDistanceToAttractions(hotel, criteria.itineraryLocations);
-        
-        const recommendation: HotelRecommendation = {
-          id: hotel.place_id,
-          name: hotel.name,
-          address: hotel.formatted_address,
-          rating: hotel.rating || 0,
-          priceLevel: hotel.price_level || 2,
-          priceRange: this.getPriceRange(hotel.price_level || 2),
-          vicinity: hotel.vicinity || '',
-          photos: hotel.photos ? hotel.photos.map(p => p.photo_reference) : [],
-          amenities: this.getAmenitiesFromTypes(hotel.types || [], criteria.travelStyle),
-          proximityScore,
-          budgetMatch,
-          aiRecommendationReason: aiReason,
-          distanceToAttractions,
-          reviewsCount: hotel.user_ratings_total || 0,
-          highlights: this.generateHighlights(hotel, proximityScore, budgetMatch)
-        };
-        
-        recommendations.push(recommendation);
-      }
-      
-      return recommendations;
-      
+      console.log('Final hotel recommendations:', sortedRecommendations.length);
+      return sortedRecommendations;
     } catch (error) {
       console.error('Error generating hotel recommendations:', error);
       return [];
