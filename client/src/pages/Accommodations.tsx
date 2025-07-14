@@ -10,15 +10,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { MapPin, Calendar, Clock, Star, Wifi, Car, Coffee, Plus, FileText, Sparkles } from "lucide-react";
+import { MapPin, Calendar, Clock, Star, Wifi, Car, Coffee, Plus, FileText, Sparkles, Bot } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { googlePlaces, searchHotelsInDestination } from "@/lib/google-places";
+import { HotelRecommendationPanel } from "@/components/HotelRecommendationPanel";
+import { HotelRecommendation } from "@/lib/hotel-recommendations";
 
 interface AccommodationsProps {
   onNavigate: (section: string) => void;
@@ -42,7 +45,7 @@ type AddAccommodationForm = z.infer<typeof addAccommodationSchema>;
 
 export function Accommodations({ onNavigate }: AccommodationsProps) {
   const [selectedTrip, setSelectedTrip] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<"booked" | "suggestions">("booked");
+  const [activeTab, setActiveTab] = useState<"booked" | "suggestions" | "ai-recommendations">("booked");
   const [showAddAccommodation, setShowAddAccommodation] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
@@ -303,6 +306,41 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
     generateSuggestionsMutation.mutate();
   };
 
+  const handleHotelSave = async (hotel: HotelRecommendation) => {
+    try {
+      await apiRequest("/api/accommodations", {
+        method: "POST",
+        body: {
+          tripId: selectedTrip,
+          name: hotel.name,
+          address: hotel.address,
+          city: hotel.vicinity,
+          checkIn: selectedTripData?.startDate,
+          checkOut: selectedTripData?.endDate,
+          type: "suggestion",
+          price: hotel.priceRange,
+          contactInfo: `Place ID: ${hotel.id}`,
+          amenities: hotel.amenities,
+          checkInTime: "15:00",
+          checkOutTime: "11:00",
+        },
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ["/api/trips", selectedTrip, "accommodations"] });
+      
+      toast({
+        title: "Hotel salvo!",
+        description: `${hotel.name} foi adicionado à sua viagem.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao salvar hotel",
+        description: "Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -371,6 +409,17 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
             >
               <Sparkles className="w-4 h-4" />
               <span>Sugestões da IA</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("ai-recommendations")}
+              className={`px-4 py-2 rounded-md transition-all duration-200 flex items-center space-x-2 ${
+                activeTab === "ai-recommendations"
+                  ? "text-white bg-white/20"
+                  : "text-white/70 hover:text-white hover:bg-white/20"
+              }`}
+            >
+              <Bot className="w-4 h-4" />
+              <span>Recomendações Inteligentes</span>
             </button>
           </div>
 
@@ -623,6 +672,14 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
                 )}
               </div>
             </div>
+          )}
+
+          {/* AI Recommendations */}
+          {activeTab === "ai-recommendations" && (
+            <HotelRecommendationPanel 
+              selectedTrip={selectedTripData} 
+              onHotelSave={handleHotelSave}
+            />
           )}
 
           {/* AI Suggestions */}
