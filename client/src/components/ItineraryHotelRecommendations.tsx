@@ -28,15 +28,18 @@ export function ItineraryHotelRecommendations({ tripId, trip }: ItineraryHotelPr
 
   const { data: cityRecommendationsData, isLoading, error } = useQuery({
     queryKey: [`/api/trips/${tripId}/itinerary-hotels`],
-    queryFn: () => apiRequest(`/api/trips/${tripId}/itinerary-hotels`, {
-      method: 'POST',
-      body: {
-        budget: trip.budget,
-        travelStyle: trip.travelStyle,
-        preferences: trip.preferences,
-        travelers: 2
-      }
-    }),
+    queryFn: async () => {
+      const response = await apiRequest(`/api/trips/${tripId}/itinerary-hotels`, {
+        method: 'POST',
+        body: {
+          budget: trip.budget,
+          travelStyle: trip.travelStyle,
+          preferences: trip.preferences,
+          travelers: 2
+        }
+      });
+      return response.json();
+    },
   });
 
   // Ensure we have a valid array
@@ -111,11 +114,11 @@ export function ItineraryHotelRecommendations({ tripId, trip }: ItineraryHotelPr
         <div className="text-center py-8">
           <Calendar className="w-12 h-12 mx-auto mb-4 text-blue-400" />
           <h3 className="text-lg font-semibold text-white mb-2">
-            Primeiro, crie seu roteiro
+            Primeiro, crie seu cronograma
           </h3>
           <p className="text-white/80">
-            Para receber recomendações de hotéis baseadas no seu roteiro, 
-            você precisa primeiro gerar um itinerário na aba "Roteiro".
+            Para receber recomendações de hotéis baseadas no seu cronograma, 
+            você precisa primeiro gerar um itinerário na aba "Cronograma".
           </p>
           <details className="mt-4 text-left">
             <summary className="text-sm text-white/60 cursor-pointer">Debug Info</summary>
@@ -133,7 +136,7 @@ export function ItineraryHotelRecommendations({ tripId, trip }: ItineraryHotelPr
       <div className="flex items-center gap-2 mb-6">
         <MapPin className="w-5 h-5 text-blue-400" />
         <h2 className="text-xl font-semibold text-white">
-          Hotéis Baseados no Seu Roteiro
+          Hotéis Baseados no Seu Cronograma
         </h2>
       </div>
 

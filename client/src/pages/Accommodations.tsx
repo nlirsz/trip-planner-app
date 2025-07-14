@@ -431,7 +431,7 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
               }`}
             >
               <MapPin className="w-4 h-4" />
-              <span>Baseado no Roteiro</span>
+              <span>Baseado no Cronograma</span>
             </button>
           </div>
 
