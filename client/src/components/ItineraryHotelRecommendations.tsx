@@ -78,6 +78,7 @@ export function ItineraryHotelRecommendations({ tripId, trip }: ItineraryHotelPr
   }
 
   if (error) {
+    console.error('Error in itinerary hotel recommendations:', error);
     return (
       <GlassCard className="p-6">
         <div className="text-center py-8">
@@ -89,12 +90,22 @@ export function ItineraryHotelRecommendations({ tripId, trip }: ItineraryHotelPr
             Não foi possível gerar recomendações baseadas no roteiro. 
             Certifique-se de que você tem um itinerário criado.
           </p>
+          <p className="text-red-300 text-sm mt-2">
+            Erro: {error.message || 'Erro desconhecido'}
+          </p>
         </div>
       </GlassCard>
     );
   }
 
   if (!cityRecommendations || cityRecommendations.length === 0) {
+    console.log('No city recommendations found:', {
+      cityRecommendationsData,
+      cityRecommendations,
+      isLoading,
+      error
+    });
+    
     return (
       <GlassCard className="p-6">
         <div className="text-center py-8">
@@ -106,6 +117,12 @@ export function ItineraryHotelRecommendations({ tripId, trip }: ItineraryHotelPr
             Para receber recomendações de hotéis baseadas no seu roteiro, 
             você precisa primeiro gerar um itinerário na aba "Roteiro".
           </p>
+          <details className="mt-4 text-left">
+            <summary className="text-sm text-white/60 cursor-pointer">Debug Info</summary>
+            <pre className="text-xs text-white/50 mt-2 bg-black/20 p-2 rounded">
+              {JSON.stringify({ cityRecommendationsData, cityRecommendations, isLoading, error }, null, 2)}
+            </pre>
+          </details>
         </div>
       </GlassCard>
     );
