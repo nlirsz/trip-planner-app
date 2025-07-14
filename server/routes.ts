@@ -393,6 +393,143 @@ END:VCALENDAR`;
     }
   });
 
+  // Itinerary-based hotel recommendations
+  app.post("/api/trips/:tripId/itinerary-hotels", async (req, res) => {
+    try {
+      const tripId = parseInt(req.params.tripId);
+      const trip = await storage.getTrip(tripId);
+      
+      if (!trip) {
+        return res.status(404).json({ message: "Trip not found" });
+      }
+      
+      // Get itinerary for the trip
+      const itinerary = await storage.getItineraryItemsByTripId(tripId);
+      
+      if (!itinerary || itinerary.length === 0) {
+        return res.status(400).json({ message: "No itinerary found for this trip. Please generate an itinerary first." });
+      }
+      
+      console.log(`Processing itinerary-based hotels for trip ${tripId} with ${itinerary.length} items`);
+      
+      // Mock response for now - this would integrate with the itinerary-based hotel service
+      const cityRecommendations = [
+        {
+          city: trip.destination,
+          stayDuration: Math.ceil((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)),
+          checkIn: trip.startDate,
+          checkOut: trip.endDate,
+          nearbyActivities: itinerary.slice(0, 5).map(item => item.title || item.location || 'Atividade').filter(Boolean),
+          hotels: [
+            {
+              id: "hotel_itinerary_1",
+              name: `Hotel Central ${trip.destination}`,
+              address: `Centro, ${trip.destination}`,
+              rating: 4.5,
+              priceLevel: 3,
+              priceRange: "R$ 300-500",
+              vicinity: "Centro",
+              photos: ["https://example.com/hotel1.jpg"],
+              amenities: ["Wi-Fi", "Café da manhã", "Academia", "Piscina"],
+              proximityScore: 85,
+              budgetMatch: true,
+              aiRecommendationReason: "Localização estratégica próxima às principais atividades do seu roteiro",
+              distanceToAttractions: itinerary.slice(0, 3).map(item => ({
+                attraction: item.title || item.location || 'Atividade',
+                distance: "0.5-2 km",
+                walkTime: "5-20 min"
+              })),
+              reviewsCount: 456,
+              highlights: ["Próximo ao itinerário", "Bem avaliado", "Localização central"]
+            },
+            {
+              id: "hotel_itinerary_2",
+              name: `Hotel Boutique ${trip.destination}`,
+              address: `Zona Turística, ${trip.destination}`,
+              rating: 4.7,
+              priceLevel: 2,
+              priceRange: "R$ 200-350",
+              vicinity: "Zona Turística",
+              photos: ["https://example.com/hotel2.jpg"],
+              amenities: ["Wi-Fi", "Restaurante", "Concierge", "Spa"],
+              proximityScore: 90,
+              budgetMatch: true,
+              aiRecommendationReason: "Ideal para explorar os pontos turísticos do seu roteiro a pé",
+              distanceToAttractions: itinerary.slice(0, 3).map(item => ({
+                attraction: item.title || item.location || 'Atividade',
+                distance: "0.2-1 km",
+                walkTime: "2-12 min"
+              })),
+              reviewsCount: 789,
+              highlights: ["Caminhada fácil", "Estilo boutique", "Excelente localização"]
+            }
+          ],
+          averageDistance: "0.5-1.5 km",
+          recommendedArea: "Centro Histórico"
+        }
+      ];
+      
+      // Add multiple cities if the itinerary spans different cities
+      const citiesInItinerary = new Set(itinerary.map(item => {
+        const location = item.location || item.title || '';
+        // Simple city extraction logic
+        if (location.toLowerCase().includes('paris')) return 'Paris';
+        if (location.toLowerCase().includes('london')) return 'London';
+        if (location.toLowerCase().includes('rome')) return 'Rome';
+        if (location.toLowerCase().includes('barcelona')) return 'Barcelona';
+        if (location.toLowerCase().includes('madrid')) return 'Madrid';
+        if (location.toLowerCase().includes('rio')) return 'Rio de Janeiro';
+        if (location.toLowerCase().includes('são paulo')) return 'São Paulo';
+        return trip.destination;
+      }));
+      
+      // If multiple cities detected, create recommendations for each
+      if (citiesInItinerary.size > 1) {
+        const multiCityRecommendations = Array.from(citiesInItinerary).map(city => ({
+          city,
+          stayDuration: Math.ceil(itinerary.filter(item => 
+            (item.location || item.title || '').toLowerCase().includes(city.toLowerCase())
+          ).length / 2), // Estimate days per city
+          checkIn: trip.startDate,
+          checkOut: trip.endDate,
+          nearbyActivities: itinerary
+            .filter(item => (item.location || item.title || '').toLowerCase().includes(city.toLowerCase()))
+            .slice(0, 3)
+            .map(item => item.title || item.location || 'Atividade'),
+          hotels: [
+            {
+              id: `hotel_${city.toLowerCase().replace(/\s+/g, '_')}_1`,
+              name: `Hotel Premium ${city}`,
+              address: `Centro, ${city}`,
+              rating: 4.4,
+              priceLevel: 3,
+              priceRange: "R$ 280-450",
+              vicinity: "Centro",
+              photos: [],
+              amenities: ["Wi-Fi", "Café da manhã", "Academia"],
+              proximityScore: 80,
+              budgetMatch: true,
+              aiRecommendationReason: `Estrategicamente localizado para explorar ${city} conforme seu roteiro`,
+              distanceToAttractions: [],
+              reviewsCount: 234,
+              highlights: ["Roteiro otimizado", "Bem localizado"]
+            }
+          ],
+          averageDistance: "1-2 km",
+          recommendedArea: "Centro"
+        }));
+        
+        res.json(multiCityRecommendations);
+      } else {
+        res.json(cityRecommendations);
+      }
+      
+    } catch (error) {
+      console.error("Error generating itinerary-based hotel recommendations:", error);
+      res.status(500).json({ message: "Failed to generate itinerary-based recommendations" });
+    }
+  });
+
   // Itinerary routes
   app.get("/api/trips/:tripId/itinerary", async (req, res) => {
     try {

@@ -21,6 +21,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { googlePlaces, searchHotelsInDestination } from "@/lib/google-places";
 import { HotelRecommendationPanel } from "@/components/HotelRecommendationPanel";
+import { ItineraryHotelRecommendations } from "@/components/ItineraryHotelRecommendations";
 import { HotelRecommendation } from "@/lib/hotel-recommendations";
 
 interface AccommodationsProps {
@@ -421,6 +422,17 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
               <Bot className="w-4 h-4" />
               <span>Recomendações Inteligentes</span>
             </button>
+            <button
+              onClick={() => setActiveTab("itinerary-based")}
+              className={`px-4 py-2 rounded-md transition-all duration-200 flex items-center space-x-2 ${
+                activeTab === "itinerary-based"
+                  ? "text-white bg-white/20"
+                  : "text-white/70 hover:text-white hover:bg-white/20"
+              }`}
+            >
+              <MapPin className="w-4 h-4" />
+              <span>Baseado no Roteiro</span>
+            </button>
           </div>
 
           {/* Booked Accommodations */}
@@ -777,6 +789,14 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
                 ))}
               </div>
             </div>
+          )}
+
+          {/* Itinerary-Based Recommendations */}
+          {activeTab === "itinerary-based" && (
+            <ItineraryHotelRecommendations 
+              tripId={selectedTrip} 
+              trip={selectedTripData}
+            />
           )}
         </div>
       )}
