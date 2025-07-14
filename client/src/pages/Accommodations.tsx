@@ -117,11 +117,120 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
       if (!selectedTrip || !selectedTripData) return;
       
       try {
+        // Get itinerary data to understand locations to visit
+        const itineraryResponse = await apiRequest(`/api/trips/${selectedTrip}/itinerary`);
+        const itineraryItems = itineraryResponse || [];
+        
+        // Extract unique locations from itinerary
+        const visitedLocations = [...new Set(itineraryItems.map((item: any) => item.location))];
+        const visitedCities = [...new Set(itineraryItems.map((item: any) => item.city))];
+        
+        console.log("Visited locations:", visitedLocations);
+        console.log("Trip budget:", selectedTripData.budget);
+        console.log("Travel style:", selectedTripData.travelStyle);
+        
         // Use Google Places API to get real hotel suggestions
         const hotels = await searchHotelsInDestination(selectedTripData.destination);
         
+        // Helper function to get budget level
+        const getBudgetLevel = (budget: string) => {
+          const budgetNum = parseInt(budget) || 0;
+          if (budgetNum < 1000) return 1; // Budget
+          if (budgetNum < 3000) return 2; // Mid-range
+          if (budgetNum < 5000) return 3; // Upscale
+          return 4; // Luxury
+        };
+
+        // Helper function to get price range
+        const getPriceRange = (priceLevel: number) => {
+          const ranges = {
+            1: "R$ 80-150",
+            2: "R$ 150-300", 
+            3: "R$ 300-500",
+            4: "R$ 500+"
+          };
+          return ranges[priceLevel as keyof typeof ranges] || "Consultar preços";
+        };
+
+        // Helper function to get amenities based on hotel types and travel style
+        const getAmenitiesFromType = (types: string[], travelStyle: string[]) => {
+          const baseAmenities = ["Wi-Fi", "Ar condicionado"];
+          
+          if (types.includes('spa')) baseAmenities.push("Spa");
+          if (types.includes('gym')) baseAmenities.push("Academia");
+          if (types.includes('restaurant')) baseAmenities.push("Restaurante");
+          if (types.includes('bar')) baseAmenities.push("Bar");
+          if (types.includes('lodging')) baseAmenities.push("Estacionamento");
+          
+          if (travelStyle.includes('luxury')) {
+            baseAmenities.push("Concierge", "Room Service");
+          }
+          if (travelStyle.includes('adventure')) {
+            baseAmenities.push("Depósito de equipamentos");
+          }
+          if (travelStyle.includes('cultural')) {
+            baseAmenities.push("Centro de negócios");
+          }
+          
+          return baseAmenities.slice(0, 5);
+        };
+
+        // Helper function to calculate proximity score
+        const getProximityScore = (hotel: any, visitedLocations: string[]) => {
+          const hotelLocation = hotel.vicinity || hotel.formatted_address;
+          let score = 0;
+          
+          visitedLocations.forEach(location => {
+            if (hotelLocation.toLowerCase().includes(location.toLowerCase())) {
+              score += 10;
+            }
+          });
+          
+          return score;
+        };
+
+        // Filter hotels based on budget and proximity to visited locations
+        const budgetLevel = getBudgetLevel(selectedTripData.budget);
+        const travelStylePrefs = selectedTripData.travelStyle || [];
+        
+        let filteredHotels = hotels
+          .filter(hotel => {
+            // Filter by price level based on budget
+            const priceLevel = hotel.price_level || 2;
+            return priceLevel <= budgetLevel;
+          })
+          .filter(hotel => {
+            // Filter by location relevance if we have itinerary data
+            if (visitedLocations.length === 0) return true;
+            
+            const hotelLocation = hotel.vicinity || hotel.formatted_address;
+            return visitedLocations.some(location => 
+              hotelLocation.toLowerCase().includes(location.toLowerCase()) ||
+              location.toLowerCase().includes(hotelLocation.toLowerCase())
+            );
+          })
+          .sort((a, b) => {
+            // Sort by rating, proximity, and number of reviews
+            const ratingA = (a.rating || 0) * Math.log(a.user_ratings_total || 1);
+            const ratingB = (b.rating || 0) * Math.log(b.user_ratings_total || 1);
+            
+            const proximityA = getProximityScore(a, visitedLocations);
+            const proximityB = getProximityScore(b, visitedLocations);
+            
+            return (ratingB + proximityB) - (ratingA + proximityA);
+          });
+
+        // If we don't have enough filtered results, add some from the original list
+        if (filteredHotels.length < 3) {
+          const additionalHotels = hotels
+            .filter(hotel => !filteredHotels.some(f => f.place_id === hotel.place_id))
+            .slice(0, 6 - filteredHotels.length);
+          
+          filteredHotels = [...filteredHotels, ...additionalHotels];
+        }
+
         // Transform Google Places results to our format
-        const suggestions = hotels.map(hotel => ({
+        const suggestions = filteredHotels.slice(0, 6).map(hotel => ({
           name: hotel.name,
           address: hotel.formatted_address,
           rating: hotel.rating || 0,
@@ -130,8 +239,11 @@ export function Accommodations({ onNavigate }: AccommodationsProps) {
           types: hotel.types || [],
           vicinity: hotel.vicinity || '',
           photos: hotel.photos || [],
-          description: `Hotel em ${hotel.vicinity || selectedTripData.destination}`,
-          amenities: hotel.types.filter(type => ['wifi', 'parking', 'restaurant', 'spa', 'gym', 'pool'].includes(type.toLowerCase())),
+          description: `${hotel.name} - ${hotel.vicinity || selectedTripData.destination}`,
+          amenities: getAmenitiesFromType(hotel.types || [], travelStylePrefs),
+          priceRange: getPriceRange(hotel.price_level || 2),
+          proximityScore: getProximityScore(hotel, visitedLocations),
+          budgetMatch: (hotel.price_level || 2) <= budgetLevel
         }));
         
         setAiSuggestions(suggestions);
