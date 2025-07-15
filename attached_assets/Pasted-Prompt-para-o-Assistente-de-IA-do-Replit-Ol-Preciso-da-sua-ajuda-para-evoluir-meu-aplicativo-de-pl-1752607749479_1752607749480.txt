@@ -1,0 +1,62 @@
+Prompt para o Assistente de IA do Replit
+Olá! Preciso da sua ajuda para evoluir meu aplicativo de planejamento de viagens.
+
+Contexto do Projeto:
+Estou a construir um planejador de viagens que usa a API do Gemini para criar roteiros personalizados. O front-end é construído com JavaScript puro (vanilla JS) e Vite, e os dados do usuário e das viagens são guardados no Firestore. A lógica está separada: um arquivo principal controla o estado e os eventos, outro cuida de toda a manipulação da interface, e um terceiro é dedicado a fazer a chamada à API externa.
+
+Objetivo Principal:
+Quero transformar a saída da IA de um simples texto para uma experiência de viagem mais rica e interativa, adicionando ferramentas úteis para o viajante.
+
+Por favor, implemente as seguintes melhorias, seguindo a lógica do projeto:
+
+Melhoria 1: Enriquecer o Conteúdo do Roteiro com Dicas Locais
+
+Intenção: Quero que a IA forneça mais do que um cronograma. Ela deve oferecer dicas valiosas que melhorem a experiência do viajante.
+
+Ação a Executar:
+
+Primeiro, localize a lógica onde o prompt para a API do Gemini é construído.
+
+Modifique esse prompt para instruir a IA a incluir, na sua resposta JSON, uma nova secção com "Dicas Locais" (por exemplo, 2 a 3 dicas curtas e úteis sobre o destino que não se encontram em guias turísticos comuns).
+
+Depois, na lógica responsável por renderizar a interface, encontre onde o roteiro é exibido e adicione um novo elemento para apresentar essas "Dicas Locais" de forma clara e destacada, logo abaixo da tabela do itinerário.
+
+Melhoria 2: Adicionar um Mapa Interativo do Roteiro
+
+Intenção: Quero que o usuário possa visualizar geograficamente onde as atividades do seu roteiro irão acontecer.
+
+Ação a Executar:
+
+Integre a API do Google Maps ao projeto. Adicione a chave da API aos "Secrets" para que seja carregada de forma segura como uma variável de ambiente.
+
+No template da interface que exibe o itinerário, adicione um div para servir como o contêiner do mapa.
+
+Na lógica da interface, crie uma nova função responsável por exibir o mapa. Esta função deverá:
+
+Receber a lista de geolocalizações (latitude e longitude) que a IA já fornece.
+
+Inicializar o mapa dentro do contêiner que você criou.
+
+Percorrer a lista de locais e adicionar um marcador (um "pin") no mapa para cada atividade do roteiro.
+
+Na lógica principal da aplicação, após uma resposta bem-sucedida da API do Gemini, chame esta nova função para renderizar o mapa com os marcadores correspondentes ao roteiro gerado.
+
+Melhoria 3: Permitir a Exportação do Roteiro para PDF
+
+Intenção: Quero dar ao usuário uma forma fácil de salvar e partilhar o seu roteiro, para que o possa usar offline ou imprimir.
+
+Ação a Executar:
+
+Adicione as bibliotecas jsPDF e html2canvas como dependências do projeto para permitir a conversão de elementos HTML para PDF.
+
+No template do itinerário, adicione um botão com o texto "Exportar como PDF".
+
+Crie a lógica para este botão. Quando clicado, o aplicativo deve:
+
+Usar a biblioteca html2canvas para capturar uma imagem do elemento que contém a tabela do roteiro.
+
+Em seguida, usar a biblioteca jsPDF para inserir essa imagem num novo documento PDF.
+
+Finalmente, acionar o download do arquivo PDF gerado no navegador do usuário.
+
+Execute estas tarefas de forma sequencial, garantindo que o código se mantém limpo e bem organizado.
