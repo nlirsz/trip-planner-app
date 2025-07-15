@@ -899,6 +899,8 @@ Gere um itinerário em JSON com:
           "time": "09:00",
           "activity": "Visita à Torre Eiffel",
           "location": "Champ de Mars, Paris",
+          "latitude": 48.8584,
+          "longitude": 2.2945,
           "notes": "Compre ingressos com antecedência"
         }
       ]
@@ -909,7 +911,12 @@ Gere um itinerário em JSON com:
     "electronics": ["Carregador", "Câmera"],
     "documents": ["Passaporte", "Seguro viagem"],
     "health": ["Remédios", "Protetor solar"]
-  }
+  },
+  "localTips": [
+    "Dica 1: informação local útil que não está em guias comuns",
+    "Dica 2: outra dica valiosa sobre o destino",
+    "Dica 3: insight especial para melhorar a experiência"
+  ]
 }`;
 
       const response = await ai.models.generateContent({

@@ -18,6 +18,9 @@ import * as z from "zod";
 import { Calendar as CalendarIcon, MapPin, Clock, Utensils, Camera, Mountain, Plus, Sparkles, ChevronRight } from "lucide-react";
 import { format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { InteractiveMap } from "@/components/InteractiveMap";
+import { PDFExporter } from "@/components/PDFExporter";
+import { Lightbulb, Map } from "lucide-react";
 
 interface ItineraryProps {
   onNavigate: (section: string) => void;
@@ -43,6 +46,8 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [localTips, setLocalTips] = useState<string[]>([]);
+  const [showMap, setShowMap] = useState(false);
 
   const { data: trips = [], isLoading } = useQuery({
     queryKey: ["/api/trips"],
@@ -70,7 +75,7 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
   const addActivityMutation = useMutation({
     mutationFn: async (data: AddActivityForm) => {
       if (!selectedTrip || !selectedDate) return;
-      
+
       return apiRequest("/api/itinerary", {
         method: "POST",
         body: {
@@ -102,7 +107,7 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
   const generateAIMutation = useMutation({
     mutationFn: async () => {
       if (!selectedTrip || !selectedTripData) return;
-      
+
       return apiRequest("/api/ai/generate-trip", {
         method: "POST",
         body: {
@@ -137,7 +142,10 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
             });
           }
         }
-        
+        if (data?.localTips && Array.isArray(data?.localTips)) {
+           setLocalTips(data.localTips);
+        }
+
         queryClient.invalidateQueries({ queryKey: ["/api/trips", selectedTrip, "itinerary"] });
         toast({
           title: "Cronograma gerado com sucesso!",
@@ -164,7 +172,7 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
   };
 
   const selectedTripData = trips.find((trip: any) => trip.id === selectedTrip);
-  
+
   // Set calendar month to trip start date when trip is selected
   useEffect(() => {
     if (selectedTripData && selectedTripData.startDate) {
@@ -263,7 +271,7 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
                 locale={ptBR}
                 disabled={(date) => !tripDates.some(tripDate => isSameDay(date, tripDate))}
               />
-              
+
               {selectedTripData && (
                 <div className="mt-4 p-4 bg-white/10 rounded-lg">
                   <h4 className="font-semibold text-white mb-2">{selectedTripData.name}</h4>
@@ -454,7 +462,7 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
                         <div className="flex-shrink-0 w-16 text-center">
                           <div className="text-lg font-semibold text-[#667EEA]">{item.time}</div>
                         </div>
-                        
+
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-2">
                             <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(item.category)}`}>
@@ -467,20 +475,20 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
                               </Badge>
                             )}
                           </div>
-                          
+
                           <h4 className="font-semibold text-white mb-1">{item.activity}</h4>
-                          
+
                           {item.location && (
                             <p className="text-sm text-white/70 flex items-center mb-2">
                               <MapPin className="w-4 h-4 mr-1" />
                               {item.location}
                             </p>
                           )}
-                          
+
                           {item.notes && (
                             <p className="text-sm text-white/70 mb-2">{item.notes}</p>
                           )}
-                          
+
                           {item.estimatedCost && (
                             <p className="text-sm font-medium text-[#667EEA]">
                               Custo estimado: {item.estimatedCost}
@@ -506,6 +514,90 @@ export function Itinerary({ onNavigate }: ItineraryProps) {
           </div>
         </div>
       )}
+      {selectedTrip && selectedTripData && (
+          <>
+           {/* Generate AI Itinerary */}
+            <GlassCard className="p-6 mb-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-2">Geração Inteligente de Roteiro</h3>
+                  <p className="text-white/70">Deixe a IA criar um roteiro personalizado baseado na sua viagem</p>
+                </div>
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={() => setShowMap(!showMap)}
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10"
+                  >
+                    <Map className="w-4 h-4 mr-2" />
+                    {showMap ? "Ocultar Mapa" : "Ver Mapa"}
+                  </Button>
+                  <Button
+                    onClick={handleGenerateAI}
+                    disabled={generateAIMutation.isPending}
+                    className="bg-[#667EEA] hover:bg-[#667EEA]/90 text-white"
+                  >
+                    {generateAIMutation.isPending ? (
+                      <Sparkles className="w-4 h-4 animate-spin mr-2" />
+                    ) : (
+                      <Sparkles className="w-4 h-4 mr-2" />
+                    )}
+                    {generateAIMutation.isPending ? "Gerando..." : "Gerar Roteiro"}
+                  </Button>
+                </div>
+              </div>
+            </GlassCard>
+
+            {/* Dicas Locais */}
+            {localTips.length > 0 && (
+              <GlassCard className="p-6 mb-8 border-l-4 border-yellow-400">
+                <div className="flex items-start space-x-3">
+                  <Lightbulb className="w-6 h-6 text-yellow-400 mt-1" />
+                  <div>
+                    <h3 className="text-xl font-semibold text-white mb-4">Dicas Locais Especiais</h3>
+                    <div className="space-y-3">
+                      {localTips.map((tip, index) => (
+                        <div key={index} className="bg-white/10 rounded-lg p-4">
+                          <p className="text-white/90">{tip}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </GlassCard>
+            )}
+            {selectedDate && (
+                <>
+                  {/* Mapa Interativo */}
+                  {showMap && selectedDateItems && selectedDateItems.length > 0 && (
+                    <GlassCard className="p-6 mb-8">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-semibold text-white">Mapa do Roteiro</h3>
+                        <PDFExporter 
+                          elementId="itinerary-content"
+                          filename={`roteiro-${selectedTripData?.name || 'viagem'}.pdf`}
+                          className="ml-4"
+                        />
+                      </div>
+                      <InteractiveMap
+                        locations={selectedDateItems
+                          .filter(item => item.location)
+                          .map((item, index) => ({
+                            lat: -22.9068 + (Math.random() - 0.5) * 0.1, // Coordenadas mocadas - seria obtido via geocoding
+                            lng: -43.1729 + (Math.random() - 0.5) * 0.1,
+                            title: item.activity,
+                            description: `${item.time} - ${item.location}`
+                          }))
+                        }
+                        className="w-full h-96"
+                      />
+                    </GlassCard>
+                  )}
+                </>
+            )}
+          </>
+        )}
+
 
       {/* Quick Actions */}
       {selectedTrip && (
